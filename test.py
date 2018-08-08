@@ -463,7 +463,7 @@ for i in total:
 
 
 index = 0
-# text는 리스트 안의 각 문장
+# text는 리스트 안의 각 문장.
 for text in text_list:
 
     # 패턴화된 결합구조들
