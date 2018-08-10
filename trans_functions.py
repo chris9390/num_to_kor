@@ -18,6 +18,9 @@ mark_dict = {'℃' : '섭씨', '℉' : '화씨', '$' : '달러', '＄' : '달러
              '+' : '플러스', '-' : '마이너스', '±' : '플러스 마이너스'}
 
 
+
+
+
 #original_list = []          # 원본 text 저장용
 #text_list = []              # 중간 text 변환 작업용
 #result_list = []            # 변환된 text 저장용
@@ -389,6 +392,7 @@ def month_trans(mo, index, text_list):
 
 # 관형어 고유어 변환
 # 3 -> 세, 11 -> 열한
+# 현재 나이(10살), 시간만 있는(11시) 패턴이 이 함수로 수행됨
 def Kca_b_trans(kca, index, text_list):
     for i in kca:
 
@@ -400,15 +404,31 @@ def Kca_b_trans(kca, index, text_list):
 
         number_str = kca_str
         word_str = ''
+        kor_len = 0
 
         space_len = kca_str.count(' ')
-        len_checker = len(kca_str) - 1 - space_len           # '살' 1글자 빼주고, 공백 개수 빼준다.
 
+        if '퍼센트' in kca_str:
+            kor_len = 3
+
+        elif '개월' in kca_str or '시간' in kca_str or '군데' in kca_str or '마리' in kca_str or '가지' in kca_str or '사람' in kca_str:
+            kor_len = 2
+
+        elif '명' in kca_str or '시' in kca_str or '개' in kca_str or '살' in kca_str or '달' in kca_str or '해' in kca_str \
+                or'원' in kca_str or '년' in kca_str or '일' in kca_str or '세' in kca_str or '월' in kca_str or '도' in kca_str:
+            kor_len = 1                                            # 2'살' or 10'시' 1글자
+
+
+        num_len = len(kca_str) - kor_len - space_len           # 숫자만의 길이. 공백 개수 빼준다.
+        len_checker = num_len
 
         for char in kca_str:
             if (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
                 word_str = word_str + char
-            elif char == '0':
+            # 0시 같은 경우
+            elif char == '0' and num_len == 1:
+                word_str = word_str +'영'
+            elif char == '0' and num_len != 1:
                 continue
             else:
                 # Kca_b
@@ -546,7 +566,10 @@ def general_trans(u, index, text_list):
     for u_str in u:
         temperature_flag = 0
         currency_flag = 0
+
+        number_str = u_str
         word_str = ''
+
 
         if '℃' in u_str:
             temperature_flag = 1
@@ -568,7 +591,9 @@ def general_trans(u, index, text_list):
 
 
 
-        number_str = u_str
+
+
+
         new_u_str = u_str.replace(',', '')        # new_cu_str 은 ',' 제거한 문자열
 
 
@@ -633,12 +658,12 @@ def general_trans(u, index, text_list):
 
 
 
-        # 화폐/기온일 경우 마지막에 단위 써주자
+        # 화폐 or 기온일 경우 마지막에 단위 써주자
         if currency_flag == 1:
                 word_str = word_str + ' ' + mark_dict[cs]
-
         elif temperature_flag == 1:
             word_str = word_str + ' 도'
+
 
 
         translated_str = text_list[index].replace(number_str, word_str, 1)

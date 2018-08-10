@@ -12,7 +12,7 @@ pattern_phonenumber_with_NNA = re.compile(r'\d+\s*[-]\s*?\d{2,3}\s*[-]\s*\d{2,4}
 pattern_phonenumber = re.compile(r'\d{2,3}\s*[-]\s*\d{2,4}\s*[-]\s*\d{3,4}')
 
 #예) 서울 12 마 3456
-pattern_carnumber = re.compile(r'(([서울|부산|대구|인천|대전|광주|울산|제주|경기|강원|충남|전남|전북|경남|경북|세종]{2})?\s*\d{1,3}\s*[가-힣]{1}\s*\d{4})')
+pattern_carnumber = re.compile(r'(([서울|부산|대구|인천|대전|광주|울산|제주|경기|강원|충남|전남|전북|경남|경북|세종]{2})?\s*\d{1,3}\s*[아|바|사|자|허|가|나|다|라|마|거|너|더|러|머|버|서|어|저|고|노|도|로|모|보|소|오|조|구|누|두|루|무|부|수|우|주]\s*\d{4})')
 
 #예) 111111 - 9999999
 pattern_register = re.compile(r'\d{6}\s*[-]\s*\d{7}')
@@ -51,6 +51,12 @@ pattern_hour_only = re.compile(r'((1[0-2]|[0-9])\s*시)')
 
 #예) 6월, 10월
 pattern_month_only = re.compile(r'((1[0-2]|[0-9])\s*월)')
+
+#예) 3 마리 -> 세 마리
+pattern_kor_with_classifier = re.compile(r'\d+\s*([시간|군데|마리|가지|사람]{2}|[명|시|개|살|달|해]{1}[^개월])')
+
+#예) 3 개월 -> 삼 개월
+pattern_ancient_with_classifier = re.compile(r'\d+\s*([퍼센트]{3}|[개월]{2}|[원|년|일|세|월|도]{1})')
 
 #위의 정해진 패턴 제외 나머지 모든 숫자 패턴.('-130%', '36.5', '10월' 같은 패턴 포함)
 pattern_general = re.compile(r'[+-]?\s*\d+[,.]?\d*[%]?')
@@ -116,9 +122,13 @@ for text in text_list:
     da = pattern_date.findall(text)                         # 날짜
     on = pattern_order.findall(text)                        # 차례
     an = pattern_anniversary.findall(text)                  # 기념일
+
     ag = pattern_age.findall(text)                          # 나이
     hr = pattern_hour_only.findall(text)                    # 시간만
     mo = pattern_month_only.findall(text)                   # 월만
+
+    kc = pattern_kor_with_classifier.findall(text)          # 고유어 수사 + 분류사
+    ac = pattern_ancient_with_classifier.findall(text)      # 한자어 수사 + 분류사
     #########################################################
 
 
@@ -128,7 +138,7 @@ for text in text_list:
 
 
     # 패턴화된 결합구조로 일단 걸러낸다.
-    if pn_NNA or pn or cn or rn or ip or tn or da or cu or te or on or an or ag or hr or mo:
+    if pn_NNA or pn or cn or rn or ip or tn or da or cu or te or on or an or ag or hr or mo or kc or ac:
         if pn_NNA:
             phonenum_trans(pn_NNA, index, text_list)
         if pn:
@@ -158,6 +168,11 @@ for text in text_list:
         if mo:
             month_trans(mo, index, text_list)
 
+        if kc:
+            Kca_b_trans(kc, index, text_list)
+        #if ac:
+
+
     # 걸러지지 않은 나머지 숫자들 매치
     if general:
         general_trans(general, index, text_list)
@@ -180,7 +195,7 @@ for text in result_list:
 
 
 # 정답 비교
-fr_answer = open('1~100_correct.txt', 'r', encoding='UTF8')
+fr_answer = open('1~100_100_correct.txt', 'r', encoding='UTF8')
 answer_list = fr_answer.readlines()
 
 
