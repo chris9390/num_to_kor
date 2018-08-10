@@ -8,7 +8,8 @@ Kca_b_dict = {'1' : '한', '2' : '두', '3' : '세', '4' : '네', '5' : '다섯'
 # 관형어 고유어 10의 자리
 Kca_b_10_dict = {'1' : '열', '2' : '스물', '3' : '서른', '4' : '마흔', '5' : '쉰', '6' : '예순', '7' : '일흔', '8' : '여든', '9' : '아흔'}
 # 수의 단위
-unit_dict = {'1' : '', '2' : '십', '3' : '백', '4' : '천',
+unit_dict = {'0' : '',
+             '1' : '', '2' : '십', '3' : '백', '4' : '천',
              '5' : '', '6' : '십', '7' : '백', '8' : '천',         # 만
              '9' : '', '10' : '십', '11' : '백', '12' : '천',      # 억
              '13' : '', '14' : '십', '15' : '백', '16' : '천'}     # 조
@@ -210,31 +211,26 @@ def order_trans(on, index, text_list):
     for on_str in on:
         number_str = on_str
         word_str = ''
-        #Kca_trans_count = 2
         unit_flag = 0
 
-        space_num = on_str.count(' ')
-        #on_str = on_str.replace(' ', '')    # 문자 사이 공백 제거
+        space_count = on_str.count(' ')
 
-        str_len = len(on_str) - 2           # -2 하는 이유는 '번째' or '차례' 길이 만큼 빼줘야 하기 때문
-        str_len = str_len - space_num       # 공백 개수 만큼 빼주기
+        num_len = len(on_str) - 2           # -2 하는 이유는 '번째' or '차례' 길이 만큼 빼줘야 하기 때문
+        num_len = num_len - space_count       # 공백 개수 만큼 빼주기
 
-        len_checker = str_len               # 자리수가 2일때 부터 Kca 로 바꿔준다. 2보다 클땐 Cca_b[+U]로 읽는다.
+        len_checker = num_len
 
         for char in on_str:
             if (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
                 word_str = word_str + char
+
             else:
+                # 자리수가 2일때 부터 Kca 로 바꿔준다. 2보다 클땐 Cca_b[+U]로 읽는다.
                 # Kca_b
                 if len_checker == 2:
-                    #if Kca_trans_count == 2:
                     word_str = word_str + Kca_b_10_dict[char]
                 elif len_checker == 1:
-                    #elif Kca_trans_count == 1:
                     word_str = word_str + Kca_b_dict[char]
-
-                    #Kca_trans_count = Kca_trans_count - 1
-
 
                 # Cca_b[+U]
                 else:
@@ -258,7 +254,7 @@ def order_trans(on, index, text_list):
                         # 일, 만, 억, 조 단위는 1도 '일'이라고 말해줘야 한다.
                         if len_checker == 1 or len_checker == 5 or len_checker == 9 or len_checker == 13:
 
-                            if len_checker == 5 and str_len == len_checker:     # 5자리 숫자에서 만의 자리가 1이면 '일' 붙이면 안된다.
+                            if len_checker == 5 and num_len == len_checker:     # 5자리 숫자에서 만의 자리가 1이면 '일' 붙이면 안된다.
                                 print('')                                       # 아무 작업도 안함
                             else:
                                 word_str = word_str + '일'
@@ -351,7 +347,7 @@ def anniversary_trans(an, index, text_list):
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
 
-
+'''
 def month_trans(mo, index, text_list):
     for mo_tuple in mo:
         mo_str = mo_tuple[0]
@@ -386,13 +382,14 @@ def month_trans(mo, index, text_list):
 
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
-
+'''
 
 
 
 # 관형어 고유어 변환
-# 3 -> 세, 11 -> 열한
-# 현재 나이(10살), 시간만 있는(11시) 패턴이 이 함수로 수행됨
+# 50미만은 고유어 수사
+# 50이상은 Cca_b_U_trans함수 호출해서 한자어 수사 처리..
+# 3 마리 -> 세 마리, 50 마리-> 오십 마리
 def Kca_b_trans(kca, index, text_list):
     for i in kca:
 
@@ -405,40 +402,103 @@ def Kca_b_trans(kca, index, text_list):
         number_str = kca_str
         word_str = ''
         kor_len = 0
+        comma_count = 0
+        unit_flag = 0
+        Cca_should_work = 0
 
-        space_len = kca_str.count(' ')
+        space_count = kca_str.count(' ')            # 공백 개수
+        comma_count = kca_str.count(',')            # ',' 개수
+        kca_str = kca_str.replace(',', '')          # 숫자 3자리 마다 있는 ',' 제거
 
-        if '퍼센트' in kca_str:
-            kor_len = 3
+#################### 이 부분 고쳐야해!!! comma_count 부분 ######################################################################################################################################################################
 
-        elif '개월' in kca_str or '시간' in kca_str or '군데' in kca_str or '마리' in kca_str or '가지' in kca_str or '사람' in kca_str:
+        if '시간' in kca_str or '군데' in kca_str or '마리' in kca_str or '가지' in kca_str or '사람' in kca_str or '개사' in kca_str:
             kor_len = 2
 
-        elif '명' in kca_str or '시' in kca_str or '개' in kca_str or '살' in kca_str or '달' in kca_str or '해' in kca_str \
-                or'원' in kca_str or '년' in kca_str or '일' in kca_str or '세' in kca_str or '월' in kca_str or '도' in kca_str:
+        elif '명' in kca_str or '시' in kca_str or '개' in kca_str or '살' in kca_str or ('달' in kca_str and '달러' not in kca_str) or '해' in kca_str\
+                or '곳' in kca_str or '배' in kca_str:
             kor_len = 1                                            # 2'살' or 10'시' 1글자
 
 
-        num_len = len(kca_str) - kor_len - space_len           # 숫자만의 길이. 공백 개수 빼준다.
+        num_len = len(kca_str) - kor_len - space_count - comma_count         # 숫자만의 길이. 공백, 콤마 개수 빼준다.
         len_checker = num_len
 
-        for char in kca_str:
-            if (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
-                word_str = word_str + char
-            # 0시 같은 경우
-            elif char == '0' and num_len == 1:
-                word_str = word_str +'영'
-            elif char == '0' and num_len != 1:
-                continue
-            else:
-                # Kca_b
-                if len_checker == 2:
-                    word_str = word_str + Kca_b_10_dict[char]
-                elif len_checker == 1:
-                    word_str = word_str + Kca_b_dict[char]
+
+        # 여기서 숫자 부분의 크기를 측정해서 50이상은 Cca함수 호출 / 50미만은 이 밑의 과정
+        if (num_len == 2 and int(kca_str[0]) >= 5) or num_len >= 3:
+            Cca_should_work = 1
 
 
-            len_checker = len_checker - 1
+
+        # 숫자가 50이상인 경우
+        if Cca_should_work == 1:
+            word_str = Cca_b_U_trans(kca_str, word_str, num_len)
+
+        # 숫자가 50미만인 경우
+        else:
+            for char in kca_str:
+                if (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
+                    word_str = word_str + char
+
+                # 0시 같은 경우
+                elif char == '0' and num_len == 1:
+                    word_str = word_str +'영'
+
+                elif char == '0' and num_len != 1:
+                    continue
+
+                else:
+                    # 자리수가 2일때 부터 Kca 로 바꿔준다. 2보다 클땐 Cca_b[+U]로 읽는다.
+                    # Kca_b
+                    if len_checker == 2:
+                        word_str = word_str + Kca_b_10_dict[char]
+                    elif len_checker == 1:
+                        word_str = word_str + Kca_b_dict[char]
+
+                    # Cca_b[+U]
+                    else:
+                        if char == '0':
+
+                            if len_checker == 5 and unit_flag == 1:
+                                word_str = word_str + '만'
+                                unit_flag = 0
+                            elif len_checker == 9 and unit_flag == 1:
+                                word_str = word_str + '억'
+                                unit_flag = 0
+                            elif len_checker == 13 and unit_flag == 1:
+                                word_str = word_str + '조'
+                                unit_flag = 0
+
+                            len_checker = len_checker - 1
+
+                            continue
+
+                        elif char == '1':
+                            # 일, 만, 억, 조 단위는 1도 '일'이라고 말해줘야 한다.
+                            if len_checker == 1 or len_checker == 5 or len_checker == 9 or len_checker == 13:
+
+                                if len_checker == 5 and num_len == len_checker:  # 5자리 숫자에서 만의 자리가 1이면 '일' 붙이면 안된다.
+                                    print('')  # 아무 작업도 안함
+                                else:
+                                    word_str = word_str + '일'
+
+                            word_str = word_str + unit_dict[str(len_checker)]  # 그 외에는 1말하지 않음. 예) 100 => 백
+                            unit_flag = 1
+                        else:
+                            word_str = word_str + ancient_dict[char] + unit_dict[str(len_checker)]
+                            unit_flag = 1
+
+                        if len_checker == 5:
+                            word_str = word_str + '만'
+                            unit_flag = 0
+                        elif len_checker == 9:
+                            word_str = word_str + '억'
+                            unit_flag = 0
+                        elif len_checker == 13:
+                            word_str = word_str + '조'
+                            unit_flag = 0
+
+                len_checker = len_checker - 1
 
 
         translated_str = text_list[index].replace(number_str, word_str, 1)
@@ -457,105 +517,89 @@ def Cca_b_U_trans(input_str, output_str, length):
     new_u_str = input_str
     word_str = output_str
     original_len = length
-    unit_len = length
+    unit_len = length           # 단위 제외 숫자만의 길이 ('12 개월' => unit_len = 2)
     unit_flag = 0
+    no_more = 0
 
 
-    # 0 하나만 있는 경우 따로 처리.
-    if unit_len == 1 and '0' in new_u_str:
-        for char in new_u_str:
-            if char == ' ':
-                word_str = word_str + char
+    for char in new_u_str:
+        if '10' in new_u_str and '월' in new_u_str and no_more == 0:
+            word_str = word_str + '시'
+            no_more = 1
 
-        word_str = word_str + '영'
+        elif '6' in new_u_str and '월' in new_u_str and no_more == 0:
+            word_str = word_str + '유'
+            no_more = 1
 
+        elif (char == '$' or char == '＄' or char == '￦' or char == '￥') or (char == '℃' or char == '℉'):
+            continue
 
-    # 1 하나만 있는 경우도 따로 처리.
-    elif unit_len == 1 and '1' in new_u_str:
-        for char in new_u_str:
-            if char == ' ':
-                word_str = word_str + char
+        elif (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
+            word_str = word_str + char
 
-        if '-' in new_u_str:
-            char = '-'
-            word_str = word_str + mark_dict[char] + ' '
-        elif '+' in new_u_str:
-            char = '+'
-            word_str = word_str + mark_dict[char] + ' '
-        elif '±' in new_u_str:
-            char = '±'
-            word_str = word_str + mark_dict[char] + ' '
+        elif char == '%' or char == '%p' or char == '%P':
+            word_str = word_str + ' ' + mark_dict[char]
 
-        word_str = word_str + '일'
+        elif char == '-' or char == '+' or char == '±':
+            word_str = word_str + ' ' + mark_dict[char] + ' '
 
+        else:
 
+            # 숫자가 0인 경우
+            if char == '0':
+                if original_len == 1:
+                    word_str = word_str + '영'
 
-    else:
-        for char in new_u_str:
-            if (char == '$' or char == '＄' or char == '￦' or char == '￥') or (char == '℃' or char == '℉'):
-                continue
-
-            elif char == '%' or char == '%p' or char == '%P':
-                word_str = word_str + ' ' + mark_dict[char]
-
-            elif char == '-' or char == '+' or char == '±':
-                word_str = word_str + ' ' + mark_dict[char] + ' '
-
-            elif char == ' ':
-                word_str = word_str + ' '
-
-            else:
-
-                # 숫자가 0인 경우
-                if char == '0':
-
-                    if unit_len == 5 and unit_flag == 1:
-                        word_str = word_str + '만'
-                        unit_flag = 0
-                    elif unit_len == 9 and unit_flag == 1:
-                        word_str = word_str + '억'
-                        unit_flag = 0
-                    elif unit_len == 13 and unit_flag == 1:
-                        word_str = word_str + '조'
-                        unit_flag = 0
-
-                    unit_len = unit_len - 1
-
-                    continue
-
-                # 숫자가 1인 경우 '일'을 말해주는 경우와 생략하는 경우로 나뉜다.
-                elif char == '1':
-                    if unit_len == 1 or unit_len == 5 or unit_len == 9 or unit_len == 13:  # 일, 만, 억, 조 단위는 1도 '일'이라고 말해줘야 한다.
-
-                        if unit_len == 5 and original_len == unit_len:      # 5자리 숫자에서 만의 자리가 1이면 '일' 붙이면 안된다.
-                            print('')                                       # 아무 작업도 안함
-                        else:
-                            word_str = word_str + '일'
-
-                    word_str = word_str + unit_dict[str(unit_len)]  # 그 외에는 1말하지 않음. 예) 100 => 백
-                    unit_flag = 1
-
-                # 0 과 1 이 아닌 숫자
-                else:
-                    word_str = word_str + ancient_dict[char] + unit_dict[str(unit_len)]
-                    unit_flag = 1
-
-
-                # 단위 붙여주는 부분
-                if unit_len == 5:
+                elif unit_len == 5 and unit_flag == 1:
                     word_str = word_str + '만'
                     unit_flag = 0
 
-                elif unit_len == 9:
+                elif unit_len == 9 and unit_flag == 1:
                     word_str = word_str + '억'
                     unit_flag = 0
 
-                elif unit_len == 13:
+                elif unit_len == 13 and unit_flag == 1:
                     word_str = word_str + '조'
                     unit_flag = 0
 
-
                 unit_len = unit_len - 1
+
+                continue
+
+            # 숫자가 1인 경우 '일'을 말해주는 경우와 생략하는 경우로 나뉜다.
+            elif char == '1':
+                if unit_len == 1 or unit_len == 5 or unit_len == 9 or unit_len == 13:  # 일, 만, 억, 조 단위는 1도 '일'이라고 말해줘야 한다.
+
+                    if unit_len == 5 and original_len == unit_len:      # 5자리 숫자에서 만의 자리가 1이면 '일' 붙이면 안된다.
+                        print('')                                       # 아무 작업도 안함
+                    else:
+                        word_str = word_str + '일'
+
+                word_str = word_str + unit_dict[str(unit_len)]  # 그 외에는 1말하지 않음. 예) 100 => 백
+                unit_flag = 1
+
+            # 0 과 1 이 아닌 숫자
+            else:
+                word_str = word_str + ancient_dict[char] + unit_dict[str(unit_len)]
+                unit_flag = 1
+
+
+            # 단위 붙여주는 부분
+            if unit_len == 5:
+                word_str = word_str + '만'
+                unit_flag = 0
+
+            elif unit_len == 9:
+                word_str = word_str + '억'
+                unit_flag = 0
+
+            elif unit_len == 13:
+                word_str = word_str + '조'
+                unit_flag = 0
+
+
+            unit_len = unit_len - 1
+
 
     return word_str
 
@@ -563,13 +607,21 @@ def Cca_b_U_trans(input_str, output_str, length):
 
 # 위의 패턴들에 해당하지 않는 나머지 숫자(온도, 화폐, 퍼센트 등등 포함) 읽는 법
 def general_trans(u, index, text_list):
-    for u_str in u:
+
+    for i in u:
+        if type(i) == tuple:
+            u_str = i[0]
+        elif type(i) == str:
+            u_str = i
+
+
         temperature_flag = 0
         currency_flag = 0
 
         number_str = u_str
         word_str = ''
 
+        kor_len = 0
 
         if '℃' in u_str:
             temperature_flag = 1
@@ -591,7 +643,12 @@ def general_trans(u, index, text_list):
 
 
 
-
+        if '퍼센트' in u_str:
+            kor_len = 3
+        elif '개월' in u_str or '개년' in u_str:
+            kor_len = 2
+        elif '원' in u_str or '년' in u_str or '일' in u_str or '세' in u_str or '월' in u_str or '도' in u_str:
+            kor_len = 1
 
 
         new_u_str = u_str.replace(',', '')        # new_cu_str 은 ',' 제거한 문자열
@@ -600,8 +657,8 @@ def general_trans(u, index, text_list):
         # 소수점 없는 경우
         if '.' not in new_u_str:
 
-            space_len = new_u_str.count(' ')        # 공백 개수
-            unit_len = len(new_u_str) - space_len   # 공백은 숫자길이에서 빼자
+            space_count = new_u_str.count(' ')        # 공백 개수
+            unit_len = len(new_u_str) - kor_len - space_count
 
             if currency_flag == 1 or temperature_flag == 1:                     # -1 하는 이유는 화폐 기호 / 섭씨, 화씨 기호 때문.
                 unit_len = unit_len - 1
@@ -624,8 +681,8 @@ def general_trans(u, index, text_list):
             # 소수점 기준으로 앞 부분과 뒷 부분으로 나눈다.
             point_divided_list = new_u_str.split('.')
 
-            space_len = point_divided_list[0].count(' ')        # 소수점 앞의 공백 개수
-            unit_len = len(point_divided_list[0]) - space_len   # 빼주자
+            space_count = point_divided_list[0].count(' ')        # 소수점 앞의 공백 개수
+            unit_len = len(point_divided_list[0]) - space_count   # 빼주자
 
             if currency_flag == 1:                          # -1 하는 이유는 화폐 기호 때문.
                 unit_len = unit_len - 1
@@ -651,6 +708,10 @@ def general_trans(u, index, text_list):
 
                 elif char == ' ':
                     word_str = word_str + char
+                    continue
+
+                elif char == '0':
+                    word_str = word_str + '영'
                     continue
 
                 word_str = word_str + ancient_dict[char]
