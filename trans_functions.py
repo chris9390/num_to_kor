@@ -44,6 +44,8 @@ def number_unit_trans(nu, index, text_list):
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
+    return text_list[index]
+
 
 def currency_kor_trans(ck, index, text_list):
 
@@ -76,7 +78,7 @@ def currency_kor_trans(ck, index, text_list):
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
-
+    return text_list[index]
 
 
 
@@ -97,6 +99,8 @@ def phonenum_trans(pn, index, text_list):
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
+    return text_list[index]
+
 
 def carnum_trans(cn, index, text_list):
     for cn_tuple in cn:
@@ -116,6 +120,9 @@ def carnum_trans(cn, index, text_list):
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
+    return text_list[index]
+
+
 def regnum_trans(rn, index, text_list):
     for rn_str in rn:
         number_str = rn_str
@@ -131,6 +138,9 @@ def regnum_trans(rn, index, text_list):
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
+    return text_list[index]
+
+
 def ipnum_trans(ip, index, text_list):
     for ip_str in ip:
         number_str = ip_str
@@ -145,6 +155,9 @@ def ipnum_trans(ip, index, text_list):
 
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
+
+    return text_list[index]
+
 
 def timenum_trans(tn, index, text_list):
     for tn_tuple in tn:
@@ -257,6 +270,7 @@ def timenum_trans(tn, index, text_list):
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
+    return text_list[index]
 
 
 def order_trans(on, index, text_list):
@@ -343,6 +357,7 @@ def order_trans(on, index, text_list):
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
+    return text_list[index]
 
 
 def date_trans(da, index, text_list):
@@ -390,6 +405,8 @@ def date_trans(da, index, text_list):
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
+    return text_list[index]
+
 
 def anniversary_trans(an, index, text_list):
     for i in an:
@@ -414,7 +431,7 @@ def anniversary_trans(an, index, text_list):
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
-
+    return text_list[index]
 
 
 
@@ -447,7 +464,7 @@ def Kca_b_trans(kca, index, text_list):
             kor_len = 2
 
         elif '명' in kca_str or '시' in kca_str or '개' in kca_str or '살' in kca_str or '달' in kca_str or '해' in kca_str\
-                or '곳' in kca_str or '배' in kca_str:
+                or '곳' in kca_str or '배' in kca_str or '대' in kca_str:
             kor_len = 1                                            # 2'살' or 10'시' 1글자
 
 
@@ -538,7 +555,7 @@ def Kca_b_trans(kca, index, text_list):
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
-
+    return text_list[index]
 
 
 
@@ -766,3 +783,5 @@ def general_trans(u, index, text_list):
 
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
+
+    return text_list[index]

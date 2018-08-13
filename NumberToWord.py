@@ -4,10 +4,10 @@ from trans_functions import *
 import re
 
 # 1조 3000억
-pattern_number_unit = re.compile(r'[,\d]+\s*[조억만]')
+pattern_number_unit = re.compile(r'\d+(,\d{3})*\s*[조억만]')
 
 # 달러, 원, 엔, 위안
-pattern_currency_kor = re.compile(r'([,\d]+\s*((달러|위안)|[원엔]))')
+pattern_currency_kor = re.compile(r'(\d+(,\d{3})*\s*((달러|위안)|[원엔]))')
 
 #예) 82-010-1234-5678
 #예) 82-053-1234-5678
@@ -53,7 +53,7 @@ pattern_ancient_with_classifier = re.compile(r'(\d+(,\d{3})*\s*(퍼센트|(개�
 
 # 50미만 고유어 수사, 50이상 한자어 수사 + 분류사
 #예) 3 마리 -> 세 마리, 52 마리 -> 오십이 마리
-pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사)|[명시개살달해곳배]))')
+pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사)|[명시개살달해곳배대]))')
 
 
 
@@ -61,6 +61,7 @@ pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마�
 pattern_general_with_point = re.compile(r'[+-]?\s*\d+[.]\d+[%]?')           # 35.64
 pattern_general_with_comma = re.compile(r'[+-]?\s*\d+(,\d{3})+[%]?')        # 123,456,789
 pattern_general_only_number = re.compile(r'[+-]?\s*\d+[%]?')                # 12345
+
 
 
 
@@ -75,10 +76,36 @@ fw = open('result.txt', 'w', encoding='UTF8')
 original_list = []          # 원본 text 저장용
 text_list = []              # 중간 text 변환 작업용
 result_list = []            # 변환된 결과 text 저장용
+nu = ''
 
 
+def pattern_check(text):
 
+    global nu, ck, pn_NNA, pn, cn, rn, ip, tn, cu, te, da, on, an, ac, kc, general_only_number, general_with_point, general_with_comma
 
+    # 패턴화된 결합구조들
+    #########################################################
+    nu = pattern_number_unit.findall(text)  # 숫자 단위
+    ck = pattern_currency_kor.findall(text)  # 화폐 한글 단위
+    pn_NNA = pattern_phonenumber_with_NNA.findall(text)  # 국가번호 + 전화번호
+    pn = pattern_phonenumber.findall(text)  # 전화번호
+    cn = pattern_carnumber.findall(text)  # 차량 등록번호
+    rn = pattern_register.findall(text)  # 주민번호
+    ip = pattern_ip.findall(text)  # ip주소
+    tn = pattern_time.findall(text)  # 시간
+    cu = pattern_currency.findall(text)  # 통화
+    te = pattern_temper.findall(text)  # 기온
+    da = pattern_date.findall(text)  # 날짜
+    on = pattern_order.findall(text)  # 차례
+    an = pattern_anniversary.findall(text)  # 기념일
+
+    ac = pattern_ancient_with_classifier.findall(text)  # 한자어 수사 + 분류사
+    kc = pattern_kor_with_classifier.findall(text)  # 고유어 수사 + 분류사
+    #########################################################
+
+    general_with_comma = pattern_general_with_comma.findall(text)
+    general_with_point = pattern_general_with_point.findall(text)
+    general_only_number = pattern_general_only_number.findall(text)
 
 
 ##################################################################################################
@@ -110,79 +137,74 @@ index = 0
 # text는 리스트 안의 각 문장.
 for text in text_list:
 
-    # 패턴화된 결합구조들
-    #########################################################
-    nu = pattern_number_unit.findall(text)                  # 숫자 단위
-    ck = pattern_currency_kor.findall(text)                 # 화폐 한글 단위
-    pn_NNA = pattern_phonenumber_with_NNA.findall(text)     # 국가번호 + 전화번호
-    pn = pattern_phonenumber.findall(text)                  # 전화번호
-    cn = pattern_carnumber.findall(text)                    # 차량 등록번호
-    rn = pattern_register.findall(text)                     # 주민번호
-    ip = pattern_ip.findall(text)                           # ip주소
-    tn = pattern_time.findall(text)                         # 시간
-    cu = pattern_currency.findall(text)                     # 통화
-    te = pattern_temper.findall(text)                       # 기온
-    da = pattern_date.findall(text)                         # 날짜
-    on = pattern_order.findall(text)                        # 차례
-    an = pattern_anniversary.findall(text)                  # 기념일
-
-    ac = pattern_ancient_with_classifier.findall(text)      # 한자어 수사 + 분류사
-    kc = pattern_kor_with_classifier.findall(text)          # 고유어 수사 + 분류사
-    #########################################################
-
-
-    general_with_comma = pattern_general_with_comma.findall(text)
-    general_with_point = pattern_general_with_point.findall(text)
-    general_only_number = pattern_general_only_number.findall(text)
-
-
+    pattern_check(text)
 
 
     # 패턴화된 결합구조로 일단 걸러낸다.
     if nu:
-        number_unit_trans(nu, index, text_list)
+        updated_text = number_unit_trans(nu, index, text_list)
+        pattern_check(updated_text)
     if ck:
-        currency_kor_trans(ck, index, text_list)
+        updated_text = currency_kor_trans(ck, index, text_list)
+        pattern_check(updated_text)
     if pn_NNA:
-        phonenum_trans(pn_NNA, index, text_list)
+        updated_text = phonenum_trans(pn_NNA, index, text_list)
+        pattern_check(updated_text)
     if pn:
-        phonenum_trans(pn, index, text_list)
+        updated_text = phonenum_trans(pn, index, text_list)
+        pattern_check(updated_text)
     if cn:
-        carnum_trans(cn, index, text_list)
+        updated_text = carnum_trans(cn, index, text_list)
+        pattern_check(updated_text)
     if rn:
-        regnum_trans(rn, index, text_list)
+        updated_text = regnum_trans(rn, index, text_list)
+        pattern_check(updated_text)
     if ip:
-        ipnum_trans(ip, index, text_list)
+        updated_text = ipnum_trans(ip, index, text_list)
+        pattern_check(updated_text)
     if tn:
-        timenum_trans(tn, index, text_list)
+        updated_text = timenum_trans(tn, index, text_list)
+        pattern_check(updated_text)
     if da:
-        date_trans(da, index, text_list)
+        updated_text = date_trans(da, index, text_list)
+        pattern_check(updated_text)
     if cu:
-        general_trans(cu, index, text_list)
+        updated_text = general_trans(cu, index, text_list)
+        pattern_check(updated_text)
     if te:
-        general_trans(te, index, text_list)
+        updated_text = general_trans(te, index, text_list)
+        pattern_check(updated_text)
     if on:
-        order_trans(on, index, text_list)
+        updated_text = order_trans(on, index, text_list)
+        pattern_check(updated_text)
     if an:
-        anniversary_trans(an, index, text_list)
+        updated_text = anniversary_trans(an, index, text_list)
+        pattern_check(updated_text)
 
     if ac:
-        general_trans(ac, index, text_list)
+        updated_text = general_trans(ac, index, text_list)
+        pattern_check(updated_text)
     if kc:
-        Kca_b_trans(kc, index, text_list)
+        updated_text = Kca_b_trans(kc, index, text_list)
+        pattern_check(updated_text)
 
 
     # 걸러지지 않은 나머지 숫자들 매치
     if general_with_comma:
-        general_trans(general_with_comma, index, text_list)
+        updated_text = general_trans(general_with_comma, index, text_list)
+        pattern_check(updated_text)
     if general_with_point:
-        general_trans(general_with_point, index, text_list)
+        updated_text = general_trans(general_with_point, index, text_list)
+        pattern_check(updated_text)
     if general_only_number:
-        general_trans(general_only_number, index, text_list)
+        updated_text = general_trans(general_only_number, index, text_list)
+        pattern_check(updated_text)
 
 
+    '''    
     else:
         print('No Match : ' + text)
+    '''
 
 
     index = index + 1
