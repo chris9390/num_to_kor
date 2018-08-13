@@ -7,7 +7,7 @@ import re
 pattern_number_unit = re.compile(r'[,\d]+\s*[조억만]')
 
 # 달러, 원, 엔, 위안
-pattern_currency_kor = re.compile(r'([,\d]+\s*([달러|위안]{2}|[원엔]{1}))')
+pattern_currency_kor = re.compile(r'([,\d]+\s*((달러|위안)|[원엔]))')
 
 #예) 82-010-1234-5678
 #예) 82-053-1234-5678
@@ -18,7 +18,7 @@ pattern_phonenumber_with_NNA = re.compile(r'\d+\s*[-]\s*?\d{2,3}\s*[-]\s*\d{2,4}
 pattern_phonenumber = re.compile(r'\d{2,3}\s*[-]\s*\d{2,4}\s*[-]\s*\d{3,4}')
 
 #예) 서울 12 마 3456
-pattern_carnumber = re.compile(r'(([서울|부산|대구|인천|대전|광주|울산|제주|경기|강원|충남|전남|전북|경남|경북|세종]{2})?\s*\d{1,3}\s*[아|바|사|자|허|가|나|다|라|마|거|너|더|러|머|버|서|어|저|고|노|도|로|모|보|소|오|조|구|누|두|루|무|부|수|우|주]\s*\d{4})')
+pattern_carnumber = re.compile(r'((서울|부산|대구|인천|대전|광주|울산|제주|경기|강원|충남|전남|전북|경남|경북|세종)?\s*\d{1,3}\s*[아바사자허가나다라마거너더러머버서어저고노도로모보소오조구누두루무부수우주]\s*\d{4})')
 
 #예) 111111 - 9999999
 pattern_register = re.compile(r'\d{6}\s*[-]\s*\d{7}')
@@ -27,7 +27,7 @@ pattern_register = re.compile(r'\d{6}\s*[-]\s*\d{7}')
 pattern_ip = re.compile(r'\d{1,3}\s*[.]\s*\d{1,3}\s*[.]\s*\d{1,3}\s*[.]\s*\d{1,3}')
 
 #예) 오후 8: 25: 05
-pattern_time = re.compile(r'(([새벽|아침|오전|오후|저녁]{2})?\s*\d{1,2}\s*[:]\s*\d{2}\s*[:]?\s*\d{0,2})')
+pattern_time = re.compile(r'((새벽|아침|오전|오후|저녁)?\s*\d{1,2}\s*[:]\s*\d{2}\s*[:]?\s*\d{0,2})')
 
 #예) $3,400
 pattern_currency = re.compile(r'[$＄￦￥]\s*[\d,.]+')
@@ -36,7 +36,7 @@ pattern_currency = re.compile(r'[$＄￦￥]\s*[\d,.]+')
 pattern_temper = re.compile(r'[+-]?[.\d]+\s*[℃℉]')
 
 #예) 3 차례 -> 세 차례
-pattern_order = re.compile(r'\d+\s*[차례|번째|번씩]{2}')
+pattern_order = re.compile(r'(\d+\s*(차례|번째|번씩))')
 
 #예) 2018-1-1, 2018-01-01
 #예) 2018.1.1, 2018.01.01
@@ -44,21 +44,23 @@ pattern_order = re.compile(r'\d+\s*[차례|번째|번씩]{2}')
 pattern_date = re.compile(r'((19|20)\d{2}\s*[-./]\s*(0?[1-9]|1[012])\s*[-./]\s*(0?[1-9]|[12][0-9]|3[0-1]))')
 
 #예) 5.18 광주민주화운동, 12 12 사태, 6. 25 전쟁
-pattern_anniversary = re.compile(r'(([1-9]|1[0-2])\s*[.]?\s*(0?[1-9]|[12][0-9]|3[0-1])\s*[가-힣]*[운동|전쟁|사태|성명|조치|선거|공동|대북|제재]{2})')
+pattern_anniversary = re.compile(r'(([1-9]|1[0-2])\s*[.]?\s*(0?[1-9]|[12][0-9]|3[0-1])\s*[가-힣]*(운동|전쟁|사태|성명|조치|선거|공동|대북|제재))')
 
 
 # 한자어 수사 + 분류사
 #예) 3 개월 -> 삼 개월, 3 개년 -> 삼 개년
-pattern_ancient_with_classifier = re.compile(r'([,\d]+\s*([퍼센트]{3}|[개월|개년]{2}|[원|년|일|세|월|도]{1}))')
+pattern_ancient_with_classifier = re.compile(r'(\d+(,\d{3})*\s*(퍼센트|(개월|개년)|[원년일세월도]))')
 
 # 50미만 고유어 수사, 50이상 한자어 수사 + 분류사
 #예) 3 마리 -> 세 마리, 52 마리 -> 오십이 마리
-pattern_kor_with_classifier = re.compile(r'([,\d]+\s*([시간|군데|마리|가지|사람|개사]{2}|[명|시|개|살|달|해|곳|배]{1}))')
+pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사)|[명시개살달해곳배]))')
 
 
 
-#위의 정해진 패턴 제외 나머지 모든 숫자 패턴.('-130%', '36.5', '10월' 같은 패턴 포함)
-pattern_general = re.compile(r'[+-]?\s*\d+[,.]?\d*[%]?')
+#위의 정해진 패턴 제외 나머지 모든 숫자 패턴.('-130%', '36.5' 같은 패턴 포함)
+pattern_general_with_point = re.compile(r'[+-]?\s*\d+[.]\d+[%]?')           # 35.64
+pattern_general_with_comma = re.compile(r'[+-]?\s*\d+(,\d{3})+[%]?')        # 123,456,789
+pattern_general_only_number = re.compile(r'[+-]?\s*\d+[%]?')                # 12345
 
 
 
@@ -129,50 +131,55 @@ for text in text_list:
     #########################################################
 
 
-    general = pattern_general.findall(text)                   # 일반적인 숫자들
+    general_with_comma = pattern_general_with_comma.findall(text)
+    general_with_point = pattern_general_with_point.findall(text)
+    general_only_number = pattern_general_only_number.findall(text)
 
 
 
 
     # 패턴화된 결합구조로 일단 걸러낸다.
-    if nu or ck or pn_NNA or pn or cn or rn or ip or tn or da or cu or te or on or an or kc or ac:
-        if nu:
-            number_unit_trans(nu, index, text_list)
-        #if ck:
+    if nu:
+        number_unit_trans(nu, index, text_list)
+    if ck:
+        currency_kor_trans(ck, index, text_list)
+    if pn_NNA:
+        phonenum_trans(pn_NNA, index, text_list)
+    if pn:
+        phonenum_trans(pn, index, text_list)
+    if cn:
+        carnum_trans(cn, index, text_list)
+    if rn:
+        regnum_trans(rn, index, text_list)
+    if ip:
+        ipnum_trans(ip, index, text_list)
+    if tn:
+        timenum_trans(tn, index, text_list)
+    if da:
+        date_trans(da, index, text_list)
+    if cu:
+        general_trans(cu, index, text_list)
+    if te:
+        general_trans(te, index, text_list)
+    if on:
+        order_trans(on, index, text_list)
+    if an:
+        anniversary_trans(an, index, text_list)
 
-        if pn_NNA:
-            phonenum_trans(pn_NNA, index, text_list)
-        if pn:
-            phonenum_trans(pn, index, text_list)
-        if cn:
-            carnum_trans(cn, index, text_list)
-        if rn:
-            regnum_trans(rn, index, text_list)
-        if ip:
-            ipnum_trans(ip, index, text_list)
-        if tn:
-            timenum_trans(tn, index, text_list)
-        if da:
-            date_trans(da, index, text_list)
-        if cu:
-            general_trans(cu, index, text_list)
-        if te:
-            general_trans(te, index, text_list)
-        if on:
-            order_trans(on, index, text_list)
-        if an:
-            anniversary_trans(an, index, text_list)
-
-
-        if ac:
-            general_trans(ac, index, text_list)
-        if kc:
-            Kca_b_trans(kc, index, text_list)
+    if ac:
+        general_trans(ac, index, text_list)
+    if kc:
+        Kca_b_trans(kc, index, text_list)
 
 
     # 걸러지지 않은 나머지 숫자들 매치
-    if general:
-        general_trans(general, index, text_list)
+    if general_with_comma:
+        general_trans(general_with_comma, index, text_list)
+    if general_with_point:
+        general_trans(general_with_point, index, text_list)
+    if general_only_number:
+        general_trans(general_only_number, index, text_list)
+
 
     else:
         print('No Match : ' + text)
@@ -213,8 +220,8 @@ print('오답률 : ' + str(wrong_prob * 100) + '%')
 
 
 fr_answer.close()
-
 '''
+
 
 fr.close()
 fw.close()

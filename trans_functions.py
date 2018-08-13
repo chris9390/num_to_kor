@@ -44,6 +44,42 @@ def number_unit_trans(nu, index, text_list):
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
+
+def currency_kor_trans(ck, index, text_list):
+
+    for i in ck:
+
+        if type(i) == tuple:
+            ck_str = i[0]
+        elif type(i) == str:
+            ck_str = i
+
+
+        number_str = ck_str
+        word_str = ''
+
+        space_len = ck_str.count(' ')
+        comma_len = ck_str.count(',')
+
+        if '달러' in ck_str or '위안' in ck_str:
+            kor_len = 2
+        elif '원' in ck_str or '엔' in ck_str:
+            kor_len = 1
+
+        num_len = len(ck_str) - space_len - comma_len - kor_len         # 자리수 예) 6,000 달러 => num_len = 4
+
+        word_str = Cca_b_U_trans(ck_str, word_str, num_len)
+
+
+
+
+        translated_str = text_list[index].replace(number_str, word_str, 1)
+        text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
+
+
+
+
+
 def phonenum_trans(pn, index, text_list):
     # pn_str은 리스트 안의 휴대전화번호 문자열
     for pn_str in pn:
@@ -225,7 +261,13 @@ def timenum_trans(tn, index, text_list):
 
 def order_trans(on, index, text_list):
 
-    for on_str in on:
+    for i in on:
+
+        if type(i) == tuple:
+            on_str = i[0]
+        elif type(i) == str:
+            on_str = i
+
         number_str = on_str
         word_str = ''
         unit_flag = 0
@@ -305,8 +347,13 @@ def order_trans(on, index, text_list):
 
 def date_trans(da, index, text_list):
 
-    for da_tuple in da:
-        da_str = da_tuple[0]
+    for i in da:
+
+        if type(i) == tuple:
+            da_str = i[0]
+        elif type(i) == str:
+            da_str = i
+
 
         number_str = da_str
         word_str = ''
@@ -345,8 +392,12 @@ def date_trans(da, index, text_list):
 
 
 def anniversary_trans(an, index, text_list):
-    for an_tuple in an:
-        an_str = an_tuple[0]
+    for i in an:
+
+        if type(i) == tuple:
+            an_str = i[0]
+        elif type(i) == str:
+            an_str = i
 
         number_str = an_str
         word_str = ''
@@ -364,42 +415,6 @@ def anniversary_trans(an, index, text_list):
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
 
-'''
-def month_trans(mo, index, text_list):
-    for mo_tuple in mo:
-        mo_str = mo_tuple[0]
-
-        number_str = mo_str
-        word_str = ''
-        no_more = 0
-
-        space_len = mo_str.count(' ')
-        mo_len = len(mo_str) - 1 - space_len        # '월' 1글자 빼주고, 공백 개수 빼주자
-
-        only_num = mo_str.replace('월', '')          # '월' 단어 제거하고, 월에 해당하는 숫자만 추출
-        only_num = only_num.replace(' ', '')        # 공백도 제거
-
-
-        for char in mo_str:
-            if (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
-                word_str = word_str + char
-
-            if no_more == 0:
-                if '6' in mo_str:
-                    word_str = word_str + '유'
-
-                elif '10' in mo_str:
-                    word_str = word_str + '시'
-
-                else:
-                    word_str = Cca_b_U_trans(only_num, word_str, mo_len)
-
-                no_more = 1
-
-
-        translated_str = text_list[index].replace(number_str, word_str, 1)
-        text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
-'''
 
 
 
