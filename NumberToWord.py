@@ -3,6 +3,12 @@
 from trans_functions import *
 import re
 
+# 1조 3000억
+pattern_number_unit = re.compile(r'[,\d]+\s*[조억만]')
+
+# 달러, 원, 엔, 위안
+pattern_currency_kor = re.compile(r'([,\d]+\s*([달러|위안]{2}|[원엔]{1}))')
+
 #예) 82-010-1234-5678
 #예) 82-053-1234-5678
 pattern_phonenumber_with_NNA = re.compile(r'\d+\s*[-]\s*?\d{2,3}\s*[-]\s*\d{2,4}\s*[-]\s*\d{3,4}')
@@ -12,7 +18,7 @@ pattern_phonenumber_with_NNA = re.compile(r'\d+\s*[-]\s*?\d{2,3}\s*[-]\s*\d{2,4}
 pattern_phonenumber = re.compile(r'\d{2,3}\s*[-]\s*\d{2,4}\s*[-]\s*\d{3,4}')
 
 #예) 서울 12 마 3456
-pattern_carnumber = re.compile(r'(([서울|부산|대구|인천|대전|광주|울산|제주|경기|강원|충남|전남|전북|경남|경북|세종]{2})?\s*\d{1,3}\s*[아|바|사|자|허|가|나|다|라|마|거|너|더|러|머|버|서|어|저|고|노|도|로|모|보|소|오|조|구|누|두|루|무|부|수|우|주]\s*\d{4}[^억만원개마\n])')
+pattern_carnumber = re.compile(r'(([서울|부산|대구|인천|대전|광주|울산|제주|경기|강원|충남|전남|전북|경남|경북|세종]{2})?\s*\d{1,3}\s*[아|바|사|자|허|가|나|다|라|마|거|너|더|러|머|버|서|어|저|고|노|도|로|모|보|소|오|조|구|누|두|루|무|부|수|우|주]\s*\d{4})')
 
 #예) 111111 - 9999999
 pattern_register = re.compile(r'\d{6}\s*[-]\s*\d{7}')
@@ -43,7 +49,7 @@ pattern_anniversary = re.compile(r'(([1-9]|1[0-2])\s*[.]?\s*(0?[1-9]|[12][0-9]|3
 
 # 한자어 수사 + 분류사
 #예) 3 개월 -> 삼 개월, 3 개년 -> 삼 개년
-pattern_ancient_with_classifier = re.compile(r'(\d+\s*([퍼센트]{3}|[개월|개년]{2}|[원|년|일|세|월|도]{1}))')
+pattern_ancient_with_classifier = re.compile(r'([,\d]+\s*([퍼센트]{3}|[개월|개년]{2}|[원|년|일|세|월|도]{1}))')
 
 # 50미만 고유어 수사, 50이상 한자어 수사 + 분류사
 #예) 3 마리 -> 세 마리, 52 마리 -> 오십이 마리
@@ -59,8 +65,8 @@ pattern_general = re.compile(r'[+-]?\s*\d+[,.]?\d*[%]?')
 
 
 #fr = open('/home/s20131533/pycharm_numbertoword/100_264_filtered.txt', 'r', encoding='UTF8')
-fr = open('101_771_filtered.txt', 'r', encoding='UTF8')
-#fr = open('patterned.txt', 'r', encoding='UTF8')
+#fr = open('101_771_filtered.txt', 'r', encoding='UTF8')
+fr = open('patterned.txt', 'r', encoding='UTF8')
 fw = open('result.txt', 'w', encoding='UTF8')
 
 
@@ -104,6 +110,8 @@ for text in text_list:
 
     # 패턴화된 결합구조들
     #########################################################
+    nu = pattern_number_unit.findall(text)                  # 숫자 단위
+    ck = pattern_currency_kor.findall(text)                 # 화폐 한글 단위
     pn_NNA = pattern_phonenumber_with_NNA.findall(text)     # 국가번호 + 전화번호
     pn = pattern_phonenumber.findall(text)                  # 전화번호
     cn = pattern_carnumber.findall(text)                    # 차량 등록번호
@@ -116,7 +124,6 @@ for text in text_list:
     on = pattern_order.findall(text)                        # 차례
     an = pattern_anniversary.findall(text)                  # 기념일
 
-
     ac = pattern_ancient_with_classifier.findall(text)      # 한자어 수사 + 분류사
     kc = pattern_kor_with_classifier.findall(text)          # 고유어 수사 + 분류사
     #########################################################
@@ -128,7 +135,11 @@ for text in text_list:
 
 
     # 패턴화된 결합구조로 일단 걸러낸다.
-    if pn_NNA or pn or cn or rn or ip or tn or da or cu or te or on or an or kc or ac:
+    if nu or ck or pn_NNA or pn or cn or rn or ip or tn or da or cu or te or on or an or kc or ac:
+        if nu:
+            number_unit_trans(nu, index, text_list)
+        #if ck:
+
         if pn_NNA:
             phonenum_trans(pn_NNA, index, text_list)
         if pn:
@@ -180,7 +191,7 @@ for text in result_list:
 
 
 
-
+'''
 # 정답 비교
 fr_answer = open('1~100_101_correct.txt', 'r', encoding='UTF8')
 answer_list = fr_answer.readlines()
@@ -203,7 +214,7 @@ print('오답률 : ' + str(wrong_prob * 100) + '%')
 
 fr_answer.close()
 
-
+'''
 
 fr.close()
 fw.close()

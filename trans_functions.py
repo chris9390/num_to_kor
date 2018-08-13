@@ -22,10 +22,27 @@ mark_dict = {'℃' : '섭씨', '℉' : '화씨', '$' : '달러', '＄' : '달러
 
 
 
-#original_list = []          # 원본 text 저장용
-#text_list = []              # 중간 text 변환 작업용
-#result_list = []            # 변환된 text 저장용
 translated_str = ''
+
+def number_unit_trans(nu, index, text_list):
+    for nu_str in nu:
+        number_str = nu_str
+        word_str = ''
+
+        space_len = nu_str.count(' ')
+        comma_len = nu_str.count(',')
+        kor_len = 1                     # '조', '억', '만'
+
+        num_len = len(nu_str) - space_len - comma_len - kor_len         # 자리수 예) 6,000 억 => num_len = 4
+
+        word_str = Cca_b_U_trans(nu_str, word_str, num_len)
+
+
+
+
+
+        translated_str = text_list[index].replace(number_str, word_str, 1)
+        text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
 def phonenum_trans(pn, index, text_list):
     # pn_str은 리스트 안의 휴대전화번호 문자열
@@ -402,25 +419,24 @@ def Kca_b_trans(kca, index, text_list):
         number_str = kca_str
         word_str = ''
         kor_len = 0
-        comma_count = 0
         unit_flag = 0
         Cca_should_work = 0
 
         space_count = kca_str.count(' ')            # 공백 개수
         comma_count = kca_str.count(',')            # ',' 개수
-        kca_str = kca_str.replace(',', '')          # 숫자 3자리 마다 있는 ',' 제거
+        #kca_str = kca_str.replace(',', '')          # 숫자 3자리 마다 있는 ',' 제거
 
-#################### 이 부분 고쳐야해!!! comma_count 부분 ######################################################################################################################################################################
+
 
         if '시간' in kca_str or '군데' in kca_str or '마리' in kca_str or '가지' in kca_str or '사람' in kca_str or '개사' in kca_str:
             kor_len = 2
 
-        elif '명' in kca_str or '시' in kca_str or '개' in kca_str or '살' in kca_str or ('달' in kca_str and '달러' not in kca_str) or '해' in kca_str\
+        elif '명' in kca_str or '시' in kca_str or '개' in kca_str or '살' in kca_str or '달' in kca_str or '해' in kca_str\
                 or '곳' in kca_str or '배' in kca_str:
             kor_len = 1                                            # 2'살' or 10'시' 1글자
 
 
-        num_len = len(kca_str) - kor_len - space_count - comma_count         # 숫자만의 길이. 공백, 콤마 개수 빼준다.
+        num_len = len(kca_str) - space_count - comma_count - kor_len         # 숫자만의 길이. 공백, 콤마 개수 빼준다.
         len_checker = num_len
 
 
@@ -439,6 +455,9 @@ def Kca_b_trans(kca, index, text_list):
             for char in kca_str:
                 if (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
                     word_str = word_str + char
+
+                elif char == ',':
+                    continue
 
                 # 0시 같은 경우
                 elif char == '0' and num_len == 1:
@@ -530,6 +549,9 @@ def Cca_b_U_trans(input_str, output_str, length):
         elif '6' in new_u_str and '월' in new_u_str and no_more == 0:
             word_str = word_str + '유'
             no_more = 1
+
+        elif char == ',':
+            continue
 
         elif (char == '$' or char == '＄' or char == '￦' or char == '￥') or (char == '℃' or char == '℉'):
             continue
