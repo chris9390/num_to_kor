@@ -4,7 +4,7 @@ from trans_functions import *
 import re
 
 # 1조 3000억
-pattern_number_unit = re.compile(r'\d+(,\d{3})*\s*[조억만]')
+pattern_number_unit = re.compile(r'(\d+(,\d{3})*\s*[조억만])')
 
 # 달러, 원, 엔, 위안
 pattern_currency_kor = re.compile(r'(\d+(,\d{3})*\s*((달러|위안)|[원엔]))')
@@ -58,9 +58,9 @@ pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마�
 
 
 #위의 정해진 패턴 제외 나머지 모든 숫자 패턴.('-130%', '36.5' 같은 패턴 포함)
-pattern_general_with_point = re.compile(r'[+-]?\s*\d+[.]\d+[%]?')           # 35.64
-pattern_general_with_comma = re.compile(r'[+-]?\s*\d+(,\d{3})+[%]?')        # 123,456,789
-pattern_general_only_number = re.compile(r'[+-]?\s*\d+[%]?')                # 12345
+pattern_general_with_point = re.compile(r'([+-]?\s*\d+[.]\d+(%P|%p|%|t|T|㎏|KG|kg|g|km|KM|cm|CM|mm|MM|m|M)?)')           # 35.64
+pattern_general_with_comma = re.compile(r'([+-]?\s*\d+(,\d{3})+(%P|%p|%|t|T|㎏|KG|kg|g|km|KM|cm|CM|mm|MM|m|M)?)')        # 123,456,789
+pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%P|%p|%|t|T|㎏|KG|kg|g|km|KM|cm|CM|mm|MM|m|M)?)')                # 12345
 
 
 
@@ -68,15 +68,14 @@ pattern_general_only_number = re.compile(r'[+-]?\s*\d+[%]?')                # 12
 
 
 #fr = open('/home/s20131533/pycharm_numbertoword/100_264_filtered.txt', 'r', encoding='UTF8')
-#fr = open('101_771_filtered.txt', 'r', encoding='UTF8')
-fr = open('patterned.txt', 'r', encoding='UTF8')
+fr = open('102_249_filtered.txt', 'r', encoding='UTF8')
+#fr = open('patterned.txt', 'r', encoding='UTF8')
 fw = open('result.txt', 'w', encoding='UTF8')
 
 
 original_list = []          # 원본 text 저장용
 text_list = []              # 중간 text 변환 작업용
 result_list = []            # 변환된 결과 text 저장용
-nu = ''
 
 
 def pattern_check(text):
@@ -210,6 +209,8 @@ for text in text_list:
     index = index + 1
 
 
+
+
 result_list = text_list
 
 for text in result_list:
@@ -220,9 +221,9 @@ for text in result_list:
 
 
 
-'''
+
 # 정답 비교
-fr_answer = open('1~100_101_correct.txt', 'r', encoding='UTF8')
+fr_answer = open('1~100_102_correct.txt', 'r', encoding='UTF8')
 answer_list = fr_answer.readlines()
 
 
@@ -234,6 +235,8 @@ for i in range(len(answer_list)):
 
 print('==================================================================================\n')
 
+print('전체 : ' + str(len(answer_list)))
+print('맞은 개수 : ' + str(len(answer_list) - wrong_count))
 print('틀린 개수 : ' + str(wrong_count))
 wrong_prob = wrong_count / len(answer_list)
 print('오답률 : ' + str(wrong_prob * 100) + '%')
@@ -242,7 +245,7 @@ print('오답률 : ' + str(wrong_prob * 100) + '%')
 
 
 fr_answer.close()
-'''
+
 
 
 fr.close()

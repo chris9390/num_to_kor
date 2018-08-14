@@ -13,19 +13,35 @@ unit_dict = {'0' : '',
              '5' : '', '6' : '십', '7' : '백', '8' : '천',         # 만
              '9' : '', '10' : '십', '11' : '백', '12' : '천',      # 억
              '13' : '', '14' : '십', '15' : '백', '16' : '천'}     # 조
+
 # 특수문자
-mark_dict = {'℃' : '섭씨', '℉' : '화씨', '$' : '달러', '＄' : '달러', '￦' : '원', '￥' : '엔',
-             '%' : '퍼센트', '%p' : '퍼센트 포인트', '%P' : '퍼센트 포인트',
-             '+' : '플러스', '-' : '마이너스', '±' : '플러스 마이너스'}
+mark_dict = {'%' : '퍼센트', 'p' : '포인트',
+             '℃': '섭씨', '℉': '화씨',
+             '+': '플러스', '-': '마이너스', '±': '플러스마이너스',
+             '$': '달러', '＄': '달러', '￦': '원', '￥': '엔',
+             't': '톤', '㎏': '킬로그램', 'kg': '킬로그램', 'g': '그램',
+             'km': '킬로미터', 'm': '미터', 'cm': '센티미터', 'mm': '밀리미터'}
 
 
-
+percent_dict = {'%p' : '퍼센트포인트', '%' : '퍼센트'}
+temperature_dict = {'℃' : '섭씨', '℉' : '화씨'}
+math_sign_dict = {'+' : '플러스', '-' : '마이너스', '±' : '플러스마이너스'}
+currency_dict = {'$' : '달러', '＄' : '달러', '￦' : '원', '￥' : '엔'}
+weight_dict = {'t' : '톤', '㎏' : '킬로그램', 'kg' : '킬로그램', 'g' : '그램'}
+distance_dict = {'km' : '킬로미터', 'cm' : '센티미터', 'mm' : '밀리미터', 'm' : '미터'}
 
 
 translated_str = ''
 
 def number_unit_trans(nu, index, text_list):
-    for nu_str in nu:
+    for i in nu:
+
+        if type(i) == tuple:
+            nu_str = i[0]
+        elif type(i) == str:
+            nu_str = i
+
+
         number_str = nu_str
         word_str = ''
 
@@ -585,17 +601,23 @@ def Cca_b_U_trans(input_str, output_str, length):
         elif char == ',':
             continue
 
-        elif (char == '$' or char == '＄' or char == '￦' or char == '￥') or (char == '℃' or char == '℉'):
+        #elif (char == '$' or char == '＄' or char == '￦' or char == '￥') or (char == '℃' or char == '℉'):
+        elif char in mark_dict:
+            continue
+
+        elif (ord(char) >= ord('a') and ord(char) <= ord('z')) or (ord(char) >= ord('A') and ord(char) <= ord('Z')):
             continue
 
         elif (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
             word_str = word_str + char
 
-        elif char == '%' or char == '%p' or char == '%P':
-            word_str = word_str + ' ' + mark_dict[char]
+        #elif char == '%' or char == 'p' or char == 'P':
+        #elif char in percent_dict:
+        #    word_str = word_str + ' ' + percent_dict[char]
 
-        elif char == '-' or char == '+' or char == '±':
-            word_str = word_str + ' ' + mark_dict[char] + ' '
+        #elif char == '-' or char == '+' or char == '±':
+        #elif char in math_sign_dict:
+        #    word_str = word_str + ' ' + math_sign_dict[char] + ' '
 
         else:
 
@@ -671,21 +693,71 @@ def general_trans(u, index, text_list):
 
         temperature_flag = 0
         currency_flag = 0
+        symbol = ''
+        no_more = 0
 
         number_str = u_str
         word_str = ''
 
         kor_len = 0
+        unit_len = 0
 
+        u_str = u_str.lower()
+
+        if no_more == 0:
+            for i in temperature_dict:
+                if i in u_str:
+                    temperature_flag = 1
+                    word_str = word_str + temperature_dict[i] + ' '
+                    symbol = '도'
+                    unit_len = len(i)
+                    no_more = 1
+                    break
+
+        '''
         if '℃' in u_str:
             temperature_flag = 1
-            word_str = word_str + mark_dict['℃'] + ' '
+            word_str = word_str + temperature_dict['℃'] + ' '
         elif '℉' in u_str:
             temperature_flag = 1
-            word_str = word_str + mark_dict['℉'] + ' '
+            word_str = word_str + temperature_dict['℉'] + ' '
+        '''
+        if no_more == 0:
+            for i in percent_dict:
+                if i in u_str:
+                    symbol = percent_dict[i]
+                    unit_len = len(i)
+                    no_more = 1
+                    break
 
+        if no_more == 0:
+            for i in currency_dict:
+                if i in u_str:
+                    #cs = i
+                    symbol = currency_dict[i]
+                    unit_len = len(i)
+                    currency_flag = 1
+                    no_more = 1
+                    break
 
-        elif '$' in u_str or '＄' in u_str:
+        if no_more == 0:
+            for i in weight_dict:
+                if i in u_str:
+                    symbol = weight_dict[i]
+                    unit_len = len(i)
+                    no_more = 1
+                    break
+
+        if no_more == 0:
+            for i in distance_dict:
+                if i in u_str:
+                    symbol = distance_dict[i]
+                    unit_len = len(i)
+                    no_more = 1
+                    break
+
+        '''
+        if '$' in u_str or '＄' in u_str:
             cs = '＄'
             currency_flag = 1
         elif '￦' in u_str:
@@ -694,6 +766,16 @@ def general_trans(u, index, text_list):
         elif '￥' in u_str:
             cs = '￥'
             currency_flag = 1
+        '''
+
+        # -, + 같은 기호는 다른 기호와 함께 나올 수 있으므로 no_more 조건문 없어야한다.
+        for i in math_sign_dict:
+            if i in u_str:
+                word_str = word_str + math_sign_dict[i]
+                unit_len = unit_len + len(i)
+                break
+
+
 
 
 
@@ -712,22 +794,23 @@ def general_trans(u, index, text_list):
         if '.' not in new_u_str:
 
             space_count = new_u_str.count(' ')        # 공백 개수
-            unit_len = len(new_u_str) - kor_len - space_count
+            num_len = len(new_u_str) - kor_len - space_count - unit_len
 
-            if currency_flag == 1 or temperature_flag == 1:                     # -1 하는 이유는 화폐 기호 / 섭씨, 화씨 기호 때문.
-                unit_len = unit_len - 1
+            #if currency_flag == 1 or temperature_flag == 1:                     # -1 하는 이유는 화폐 기호 / 섭씨, 화씨 기호 때문.
+            #    num_len = num_len - 1
 
-            if '%' in new_u_str:        # -100, 100% 이면 자리수는 4가 아니라 3
-                unit_len = unit_len - 1
-
-            if '-' in new_u_str or '+' in new_u_str or '±' in new_u_str:
-                unit_len = unit_len - 1
-
-            if '%p' in new_u_str or '%P' in new_u_str:                          # 30%p 이면 자리수는 4가 아니라 2
-                unit_len = unit_len - 2
+            #if '-' in new_u_str or '+' in new_u_str or '±' in new_u_str:
+            #    num_len = num_len - 1
 
 
-            word_str = Cca_b_U_trans(new_u_str, word_str, unit_len)
+            #if '%p' in new_u_str or '%P' in new_u_str:                          # 30%p 이면 자리수는 4가 아니라 2
+            #    num_len = num_len - 2
+            #elif '%' in new_u_str:                                              # -100, 100% 이면 자리수는 4가 아니라 3
+            #    num_len = num_len - 1
+
+
+
+            word_str = Cca_b_U_trans(new_u_str, word_str, num_len)
 
 
         # 소수점 있는 경우
@@ -736,16 +819,18 @@ def general_trans(u, index, text_list):
             point_divided_list = new_u_str.split('.')
 
             space_count = point_divided_list[0].count(' ')        # 소수점 앞의 공백 개수
-            unit_len = len(point_divided_list[0]) - space_count   # 빼주자
+
+
+            num_len = len(point_divided_list[0]) - space_count   # 빼주자
 
             if currency_flag == 1:                          # -1 하는 이유는 화폐 기호 때문.
-                unit_len = unit_len - 1
+                num_len = num_len - 1
 
             if '-' in new_u_str or '+' in new_u_str or '±' in new_u_str:        # -36.5 이면 소수점 앞의 자리수는 3이 아니라 2
-                unit_len = unit_len - 1
+                num_len = num_len - 1
 
             # 앞부분은 단위 따져가며 읽어야한다.
-            word_str = Cca_b_U_trans(point_divided_list[0], word_str, unit_len)
+            word_str = Cca_b_U_trans(point_divided_list[0], word_str, num_len)
 
             # 사이에 '쩜' 추가해주고
             word_str = word_str + '쩜'
@@ -753,14 +838,13 @@ def general_trans(u, index, text_list):
 
             # 뒷부분은 단위 없이 각각 한자어(ancient_dict)로 읽어야한다.
             for char in point_divided_list[1]:
-                if char == '%' or char == '%p' or char == '%P':
-                    word_str = word_str + ' ' + mark_dict[char]
+                if char in mark_dict:
                     continue
 
-                elif char in mark_dict:
+                elif (ord(char) >= ord('a') and ord(char) <= ord('z')) or (ord(char) >= ord('A') and ord(char) <= ord('Z')):
                     continue
 
-                elif char == ' ':
+                elif (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
                     word_str = word_str + char
                     continue
 
@@ -774,10 +858,14 @@ def general_trans(u, index, text_list):
 
 
         # 화폐 or 기온일 경우 마지막에 단위 써주자
-        if currency_flag == 1:
-                word_str = word_str + ' ' + mark_dict[cs]
-        elif temperature_flag == 1:
-            word_str = word_str + ' 도'
+        #if currency_flag == 1:
+        #    word_str = word_str + ' ' + currency_dict[cs]
+        #elif temperature_flag == 1:
+        #    word_str = word_str + ' 도'
+
+
+        # 단위 'symbol' 써주는 부분
+        word_str = word_str + symbol
 
 
 

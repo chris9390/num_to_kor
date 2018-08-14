@@ -1,8 +1,8 @@
 import re
 pattern_kor = re.compile('[^0-9]*')
 
-fr = open('/home/public_data/news_corpus/news_norm_2015_101_771.txt', 'r', encoding='UTF8')
-fw = open('101_771_filtered.txt', 'w')
+fr = open('/home/public_data/news_corpus/news_norm_2015_102_249.txt', 'r', encoding='UTF8')
+fw = open('102_249_filtered.txt', 'w')
 
 total = fr.readlines()
 
