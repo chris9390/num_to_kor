@@ -480,7 +480,7 @@ def Kca_b_trans(kca, index, text_list):
             kor_len = 2
 
         elif '명' in kca_str or '시' in kca_str or '개' in kca_str or '살' in kca_str or '달' in kca_str or '해' in kca_str\
-                or '곳' in kca_str or '배' in kca_str or '대' in kca_str:
+                or '곳' in kca_str or '배' in kca_str or '대' in kca_str or '장' in kca_str:
             kor_len = 1                                            # 2'살' or 10'시' 1글자
 
 

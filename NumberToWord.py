@@ -3,8 +3,10 @@
 from trans_functions import *
 import re
 
+
 # 1조 3000억
 pattern_number_unit = re.compile(r'(\d+(,\d{3})*\s*[조억만])')
+
 
 # 달러, 원, 엔, 위안
 pattern_currency_kor = re.compile(r'(\d+(,\d{3})*\s*((달러|위안)|[원엔]))')
@@ -53,14 +55,14 @@ pattern_ancient_with_classifier = re.compile(r'(\d+(,\d{3})*\s*(퍼센트|(개�
 
 # 50미만 고유어 수사, 50이상 한자어 수사 + 분류사
 #예) 3 마리 -> 세 마리, 52 마리 -> 오십이 마리
-pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사)|[명시개살달해곳배대]))')
+pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사)|[명시개살달해곳배대장]))')
 
 
 
 #위의 정해진 패턴 제외 나머지 모든 숫자 패턴.('-130%', '36.5' 같은 패턴 포함)
-pattern_general_with_point = re.compile(r'([+-]?\s*\d+[.]\d+(%P|%p|%|t|T|㎏|KG|kg|g|km|KM|cm|CM|mm|MM|m|M)?)')           # 35.64
-pattern_general_with_comma = re.compile(r'([+-]?\s*\d+(,\d{3})+(%P|%p|%|t|T|㎏|KG|kg|g|km|KM|cm|CM|mm|MM|m|M)?)')        # 123,456,789
-pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%P|%p|%|t|T|㎏|KG|kg|g|km|KM|cm|CM|mm|MM|m|M)?)')                # 12345
+pattern_general_with_point = re.compile(r'([+-]?\s*\d+[.]\d+(%p|%|t|㎏|kg|g|km|cm|mm|m)?)', re.IGNORECASE)       # 35.64
+pattern_general_with_comma = re.compile(r'([+-]?\s*\d+(,\d{3})+(%p|%|t|㎏|kg|g|km|cm|mm|m)?)', re.IGNORECASE)    # 123,456,789
+pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%p|%|t|㎏|kg|g|km|cm|mm|m)?)', re.IGNORECASE)            # 12345
 
 
 
@@ -68,8 +70,8 @@ pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%P|%p|%|t|T|㎏|KG|kg|g|
 
 
 #fr = open('/home/s20131533/pycharm_numbertoword/100_264_filtered.txt', 'r', encoding='UTF8')
-fr = open('102_249_filtered.txt', 'r', encoding='UTF8')
-#fr = open('patterned.txt', 'r', encoding='UTF8')
+#fr = open('102_249_filtered.txt', 'r', encoding='UTF8')
+fr = open('patterned.txt', 'r', encoding='UTF8')
 fw = open('result.txt', 'w', encoding='UTF8')
 
 
@@ -101,6 +103,7 @@ def pattern_check(text):
     ac = pattern_ancient_with_classifier.findall(text)  # 한자어 수사 + 분류사
     kc = pattern_kor_with_classifier.findall(text)  # 고유어 수사 + 분류사
     #########################################################
+
 
     general_with_comma = pattern_general_with_comma.findall(text)
     general_with_point = pattern_general_with_point.findall(text)
@@ -189,6 +192,7 @@ for text in text_list:
 
 
     # 걸러지지 않은 나머지 숫자들 매치
+
     if general_with_comma:
         updated_text = general_trans(general_with_comma, index, text_list)
         pattern_check(updated_text)
@@ -221,7 +225,7 @@ for text in result_list:
 
 
 
-
+'''
 # 정답 비교
 fr_answer = open('1~100_102_correct.txt', 'r', encoding='UTF8')
 answer_list = fr_answer.readlines()
@@ -245,7 +249,7 @@ print('오답률 : ' + str(wrong_prob * 100) + '%')
 
 
 fr_answer.close()
-
+'''
 
 
 fr.close()
