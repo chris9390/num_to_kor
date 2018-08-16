@@ -6,10 +6,13 @@ import re
 
 age_possible_list = '(남성|여성|남자|여자|주부|지적장애인|조선족|대학생|재력가|할머니|할아버지|아버지|어머니|아들|딸|' \
                 '일당|중국동포|차량털이범|초반|중반|후반|교수|초등|정신질환자|여대생|용의자|운전자|고령|재력가|' \
-                '내연녀|제자|마약|노인|어르신|가장|마을|주민|미혼|기혼)'
+                '내연녀|제자|마약|노인|어르신|가장|마을|주민|미혼|기혼|고교|고등|청소년)'
 
 # 40대 남성
 pattern_age_with_dae = re.compile(r'([1-9]0대\s*' +age_possible_list + r')')
+
+# 3대 조직
+pattern_generation = re.compile(r'([1-9]0?대\s*[가-힣]*(조직))')
 
 # 1조 3000억
 pattern_number_unit = re.compile(r'(\d+(,\d{3})*\s*[조억만])')
@@ -53,7 +56,7 @@ pattern_order = re.compile(r'(\d+\s*(차례|번째|번씩))')
 pattern_date = re.compile(r'((19|20)\d{2}\s*[-./]\s*(0?[1-9]|1[012])\s*[-./]\s*(0?[1-9]|[12][0-9]|3[0-1]))')
 
 #예) 5.18 광주민주화운동, 12 12 사태, 6. 25 전쟁
-pattern_anniversary = re.compile(r'(([1-9]|1[0-2])\s*[.]?\s*(0?[1-9]|[12][0-9]|3[0-1])\s*[가-힣]*(운동|전쟁|사태|성명|조치|선거|공동|대북|제재))')
+pattern_anniversary = re.compile(r'(([1-9]|1[0-2])\s*[.]?\s*(0?[1-9]|[12][0-9]|3[0-1])\s*[가-힣]*(운동|전쟁|사태|성명|조치|선거|공동|대북|제재|세월호))')
 
 
 # 한자어 수사 + 분류사
@@ -62,7 +65,7 @@ pattern_ancient_with_classifier = re.compile(r'(\d+(,\d{3})*\s*(퍼센트|(개�
 
 # 50미만 고유어 수사, 50이상 한자어 수사 + 분류사
 #예) 3 마리 -> 세 마리, 52 마리 -> 오십이 마리
-pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사)|[명시개살달해곳배대장]))')
+pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사)|[명시개살달해곳배대장갑]))')
 
 
 
@@ -89,11 +92,12 @@ result_list = []            # 변환된 결과 text 저장용
 
 def pattern_check(text):
 
-    global ad, nu, ck, pn_NNA, pn, cn, rn, ip, tn, cu, te, da, on, an, ac, kc, general_only_number, general_with_point, general_with_comma
+    global ad, ge, nu, ck, pn_NNA, pn, cn, rn, ip, tn, cu, te, da, on, an, ac, kc, general_only_number, general_with_point, general_with_comma
 
     # 패턴화된 결합구조들
     #########################################################
     ad = pattern_age_with_dae.findall(text) # '대'가 붙은 나이
+    ge = pattern_generation.findall(text)           # 세대
     nu = pattern_number_unit.findall(text)  # 숫자 단위
     ck = pattern_currency_kor.findall(text)  # 화폐 한글 단위
     pn_NNA = pattern_phonenumber_with_NNA.findall(text)  # 국가번호 + 전화번호
@@ -153,6 +157,9 @@ for text in text_list:
     # 패턴화된 결합구조로 일단 걸러낸다.
     if ad:
         updated_text = general_trans(ad, index, text_list)
+        pattern_check(updated_text)
+    if ge:
+        updated_text = general_trans(ge, index, text_list)
         pattern_check(updated_text)
     if nu:
         updated_text = number_unit_trans(nu, index, text_list)
@@ -254,7 +261,7 @@ print('전체 : ' + str(len(answer_list)))
 print('맞은 개수 : ' + str(len(answer_list) - wrong_count))
 print('틀린 개수 : ' + str(wrong_count))
 wrong_prob = wrong_count / len(answer_list)
-print('오답률 : ' + str(wrong_prob * 100) + '%')
+print('\n오답률 : ' + str(wrong_prob * 100) + '%')
 
 
 

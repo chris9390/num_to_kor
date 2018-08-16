@@ -38,7 +38,7 @@ distance_dict = {'km' : '킬로미터', 'cm' : '센티미터', 'mm' : '밀리미
 age_possible_list = ['남성', '여성', '남자', '여자', '주부', '지적장애인', '조선족', '대학생', '재력가', '할머니', '할아버지',
                     '아버지', '어머니', '아들', '딸', '일당', '중국동포', '차량털이범', '초반', '중반', '후반', '교수', '초등',
                     '정신질환자', '여대생', '용의자', '운전자', '고령', '재력가', '내연녀', '제자', '마약', '노인', '어르신',
-                    '가장', '마을', '주민', '미혼', '기혼']
+                    '가장', '마을', '주민', '미혼', '기혼', '고교', '고등','청소년']
 
 
 
@@ -86,14 +86,24 @@ def currency_kor_trans(ck, index, text_list):
 
         number_str = ck_str
         word_str = ''
+        kor_len = 0
 
         space_len = ck_str.count(' ')
         comma_len = ck_str.count(',')
 
+
+        # 추출된 패턴에서 한글길이를 세어준다.
+        for char in ck_str:
+            if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                kor_len = kor_len + 1
+
+        '''
         if '달러' in ck_str or '위안' in ck_str:
             kor_len = 2
         elif '원' in ck_str or '엔' in ck_str:
             kor_len = 1
+        '''
+
 
         num_len = len(ck_str) - space_len - comma_len - kor_len         # 자리수 예) 6,000 달러 => num_len = 4
 
@@ -487,13 +497,19 @@ def Kca_b_trans(kca, index, text_list):
 
 
 
+        # 추출된 패턴에서 한글길이를 세어준다.
+        for char in kca_str:
+            if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                kor_len = kor_len + 1
+
+        '''
         if '시간' in kca_str or '군데' in kca_str or '마리' in kca_str or '가지' in kca_str or '사람' in kca_str or '개사' in kca_str:
             kor_len = 2
 
         elif '명' in kca_str or '시' in kca_str or '개' in kca_str or '살' in kca_str or '달' in kca_str or '해' in kca_str\
-                or '곳' in kca_str or '배' in kca_str or '대' in kca_str or '장' in kca_str:
+                or '곳' in kca_str or '배' in kca_str or '대' in kca_str or '장' in kca_str or '갑' in kca_str:
             kor_len = 1                                            # 2'살' or 10'시' 1글자
-
+        '''
 
         num_len = len(kca_str) - space_count - comma_count - kor_len         # 숫자만의 길이. 공백, 콤마 개수 빼준다.
         len_checker = num_len
@@ -772,26 +788,32 @@ def general_trans(u, index, text_list):
                 break
 
 
+        # 추출된 패턴에서 한글길이를 세어준다.
+        for char in u_str:
+            if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                kor_len = kor_len + 1
 
-
-
+        '''
         if '퍼센트' in u_str:
             kor_len = 3
         elif '개월' in u_str or '개년' in u_str:
             kor_len = 2
         elif '원' in u_str or '년' in u_str or '일' in u_str or '세' in u_str or '월' in u_str or '도' in u_str:
             kor_len = 1
-
+        '''
 
 
         ########### '40대 주민' 같은 경우 ###########
+        '''
         if '대' in u_str:
             kor_len = 1
-
+        
+        
         for i in age_possible_list:
             if i in u_str:
                 kor_len = kor_len + len(i)
                 break
+        '''
         ############################################
 
 
