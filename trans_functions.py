@@ -1,3 +1,7 @@
+import re
+
+pattern_only_number = re.compile(r'[,.\d]+')
+
 
 # 한자어
 ancient_dict = {'0' : '공', '1' : '일', '2' : '이', '3' : '삼', '4' : '사', '5' : '오', '6' : '육', '7' : '칠', '8' : '팔', '9' : '구'}
@@ -29,6 +33,13 @@ math_sign_dict = {'+' : '플러스', '-' : '마이너스', '±' : '플러스마�
 currency_dict = {'$' : '달러', '＄' : '달러', '￦' : '원', '￥' : '엔'}
 weight_dict = {'t' : '톤', '㎏' : '킬로그램', 'kg' : '킬로그램', 'g' : '그램'}
 distance_dict = {'km' : '킬로미터', 'cm' : '센티미터', 'mm' : '밀리미터', 'm' : '미터'}
+
+
+age_possible_list = ['남성', '여성', '남자', '여자', '주부', '지적장애인', '조선족', '대학생', '재력가', '할머니', '할아버지',
+                    '아버지', '어머니', '아들', '딸', '일당', '중국동포', '차량털이범', '초반', '중반', '후반', '교수', '초등',
+                    '정신질환자', '여대생', '용의자', '운전자', '고령', '재력가', '내연녀', '제자', '마약', '노인', '어르신',
+                    '가장', '마을', '주민', '미혼', '기혼']
+
 
 
 translated_str = ''
@@ -704,6 +715,8 @@ def general_trans(u, index, text_list):
 
         u_str = u_str.lower()
 
+
+
         if no_more == 0:
             for i in temperature_dict:
                 if i in u_str:
@@ -714,14 +727,7 @@ def general_trans(u, index, text_list):
                     no_more = 1
                     break
 
-        '''
-        if '℃' in u_str:
-            temperature_flag = 1
-            word_str = word_str + temperature_dict['℃'] + ' '
-        elif '℉' in u_str:
-            temperature_flag = 1
-            word_str = word_str + temperature_dict['℉'] + ' '
-        '''
+
         if no_more == 0:
             for i in percent_dict:
                 if i in u_str:
@@ -756,17 +762,7 @@ def general_trans(u, index, text_list):
                     no_more = 1
                     break
 
-        '''
-        if '$' in u_str or '＄' in u_str:
-            cs = '＄'
-            currency_flag = 1
-        elif '￦' in u_str:
-            cs = '￦'
-            currency_flag = 1
-        elif '￥' in u_str:
-            cs = '￥'
-            currency_flag = 1
-        '''
+
 
         # -, + 같은 기호는 다른 기호와 함께 나올 수 있으므로 no_more 조건문 없어야한다.
         for i in math_sign_dict:
@@ -787,6 +783,19 @@ def general_trans(u, index, text_list):
             kor_len = 1
 
 
+
+        ########### '40대 주민' 같은 경우 ###########
+        if '대' in u_str:
+            kor_len = 1
+
+        for i in age_possible_list:
+            if i in u_str:
+                kor_len = kor_len + len(i)
+                break
+        ############################################
+
+
+
         new_u_str = u_str.replace(',', '')        # new_cu_str 은 ',' 제거한 문자열
 
 
@@ -795,18 +804,6 @@ def general_trans(u, index, text_list):
 
             space_count = new_u_str.count(' ')        # 공백 개수
             num_len = len(new_u_str) - kor_len - space_count - unit_len
-
-            #if currency_flag == 1 or temperature_flag == 1:                     # -1 하는 이유는 화폐 기호 / 섭씨, 화씨 기호 때문.
-            #    num_len = num_len - 1
-
-            #if '-' in new_u_str or '+' in new_u_str or '±' in new_u_str:
-            #    num_len = num_len - 1
-
-
-            #if '%p' in new_u_str or '%P' in new_u_str:                          # 30%p 이면 자리수는 4가 아니라 2
-            #    num_len = num_len - 2
-            #elif '%' in new_u_str:                                              # -100, 100% 이면 자리수는 4가 아니라 3
-            #    num_len = num_len - 1
 
 
 
@@ -855,13 +852,6 @@ def general_trans(u, index, text_list):
                 word_str = word_str + ancient_dict[char]
 
 
-
-
-        # 화폐 or 기온일 경우 마지막에 단위 써주자
-        #if currency_flag == 1:
-        #    word_str = word_str + ' ' + currency_dict[cs]
-        #elif temperature_flag == 1:
-        #    word_str = word_str + ' 도'
 
 
         # 단위 'symbol' 써주는 부분

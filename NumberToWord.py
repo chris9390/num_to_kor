@@ -4,6 +4,13 @@ from trans_functions import *
 import re
 
 
+age_possible_list = '(남성|여성|남자|여자|주부|지적장애인|조선족|대학생|재력가|할머니|할아버지|아버지|어머니|아들|딸|' \
+                '일당|중국동포|차량털이범|초반|중반|후반|교수|초등|정신질환자|여대생|용의자|운전자|고령|재력가|' \
+                '내연녀|제자|마약|노인|어르신|가장|마을|주민|미혼|기혼)'
+
+# 40대 남성
+pattern_age_with_dae = re.compile(r'([1-9]0대\s*' +age_possible_list + r')')
+
 # 1조 3000억
 pattern_number_unit = re.compile(r'(\d+(,\d{3})*\s*[조억만])')
 
@@ -70,8 +77,8 @@ pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%p|%|t|㎏|kg|g|km|cm|mm
 
 
 #fr = open('/home/s20131533/pycharm_numbertoword/100_264_filtered.txt', 'r', encoding='UTF8')
-#fr = open('102_249_filtered.txt', 'r', encoding='UTF8')
-fr = open('patterned.txt', 'r', encoding='UTF8')
+fr = open('102_249_filtered.txt', 'r', encoding='UTF8')
+#fr = open('patterned.txt', 'r', encoding='UTF8')
 fw = open('result.txt', 'w', encoding='UTF8')
 
 
@@ -82,10 +89,11 @@ result_list = []            # 변환된 결과 text 저장용
 
 def pattern_check(text):
 
-    global nu, ck, pn_NNA, pn, cn, rn, ip, tn, cu, te, da, on, an, ac, kc, general_only_number, general_with_point, general_with_comma
+    global ad, nu, ck, pn_NNA, pn, cn, rn, ip, tn, cu, te, da, on, an, ac, kc, general_only_number, general_with_point, general_with_comma
 
     # 패턴화된 결합구조들
     #########################################################
+    ad = pattern_age_with_dae.findall(text) # '대'가 붙은 나이
     nu = pattern_number_unit.findall(text)  # 숫자 단위
     ck = pattern_currency_kor.findall(text)  # 화폐 한글 단위
     pn_NNA = pattern_phonenumber_with_NNA.findall(text)  # 국가번호 + 전화번호
@@ -143,6 +151,9 @@ for text in text_list:
 
 
     # 패턴화된 결합구조로 일단 걸러낸다.
+    if ad:
+        updated_text = general_trans(ad, index, text_list)
+        pattern_check(updated_text)
     if nu:
         updated_text = number_unit_trans(nu, index, text_list)
         pattern_check(updated_text)
@@ -225,7 +236,7 @@ for text in result_list:
 
 
 
-'''
+
 # 정답 비교
 fr_answer = open('1~100_102_correct.txt', 'r', encoding='UTF8')
 answer_list = fr_answer.readlines()
@@ -249,7 +260,7 @@ print('오답률 : ' + str(wrong_prob * 100) + '%')
 
 
 fr_answer.close()
-'''
+
 
 
 fr.close()
