@@ -1,18 +1,27 @@
+# -*- coding: utf-8 -*-
 
-#import trans_functions as trf
 from trans_functions import *
 import re
 
 
-age_possible_list = '(남성|여성|남자|여자|주부|지적장애인|조선족|대학생|재력가|할머니|할아버지|아버지|어머니|아들|딸|' \
-                '일당|중국동포|차량털이범|초반|중반|후반|교수|초등|정신질환자|여대생|용의자|운전자|고령|재력가|' \
-                '내연녀|제자|마약|노인|어르신|가장|마을|주민|미혼|기혼|고교|고등|청소년)'
+# 2~3개
+#pattern_wave = re.compile(r'\d+\s*[~]\s*\d+')
 
-# 40대 남성
-pattern_age_with_dae = re.compile(r'([1-9]0대\s*' +age_possible_list + r')')
 
-# 3대 조직
-pattern_generation = re.compile(r'([1-9]0?대\s*[가-힣]*(조직))')
+#age_possible_list = '(남성|여성|남자|여자|주부|지적장애인|조선족|대학생|재력가|할머니|할아버지|아버지|어머니|아들|딸|' \
+#                '일당|중국동포|차량털이범|초반|중반|후반|교수|초등|정신질환자|여대생|용의자|운전자|고령|재력가|' \
+#                '내연녀|제자|마약|노인|어르신|가장|마을|주민|미혼|기혼|고교|고등|청소년)'
+
+
+
+# ??대 앞뒤로 두 어절
+#pattern_age_with_dae = re.compile(r'([1-9]0대\s*' +age_possible_list + r')')
+pattern_age_with_dae = re.compile(r'[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}\s*[1-9]0대[가-힣]?\s*[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}')
+
+# 3대 조직, 10대 대기업
+#pattern_generation = re.compile(r'([0-9]+?대\s*[가-힣]*(원칙|운영|사업|과제|총장|선거|조직|혁신|그룹|국회|증권사|로펌|주요 로펌|기업|신기술|대기업|슈퍼푸드|건강식품))|((제|국내)\s*[0-9]+대)')
+pattern_generation = re.compile(r'[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}\s*[0-9]+대[가-힣]?\s*[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}')
+
 
 # 1조 3000억
 pattern_number_unit = re.compile(r'(\d+(,\d{3})*\s*[조억만])')
@@ -79,8 +88,7 @@ pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%p|%|t|㎏|kg|g|km|cm|mm
 
 
 
-#fr = open('/home/s20131533/pycharm_numbertoword/100_264_filtered.txt', 'r', encoding='UTF8')
-fr = open('102_249_filtered.txt', 'r', encoding='UTF8')
+fr = open('filtered/100_264_filtered.txt', 'r', encoding='UTF8')
 #fr = open('patterned.txt', 'r', encoding='UTF8')
 fw = open('result.txt', 'w', encoding='UTF8')
 
@@ -152,14 +160,20 @@ index = 0
 for text in text_list:
 
     pattern_check(text)
+    print(str(index+1))
+
 
 
     # 패턴화된 결합구조로 일단 걸러낸다.
     if ad:
-        updated_text = general_trans(ad, index, text_list)
+        updated_text = general_trans(ad, index, text_list, 'ad')
         pattern_check(updated_text)
+
     if ge:
-        updated_text = general_trans(ge, index, text_list)
+        updated_text = general_trans(ge, index, text_list, 'ge')
+        pattern_check(updated_text)
+    if an:
+        updated_text = anniversary_trans(an, index, text_list)
         pattern_check(updated_text)
     if nu:
         updated_text = number_unit_trans(nu, index, text_list)
@@ -189,20 +203,18 @@ for text in text_list:
         updated_text = date_trans(da, index, text_list)
         pattern_check(updated_text)
     if cu:
-        updated_text = general_trans(cu, index, text_list)
+        updated_text = general_trans(cu, index, text_list, None)
         pattern_check(updated_text)
     if te:
-        updated_text = general_trans(te, index, text_list)
+        updated_text = general_trans(te, index, text_list, None)
         pattern_check(updated_text)
     if on:
         updated_text = order_trans(on, index, text_list)
         pattern_check(updated_text)
-    if an:
-        updated_text = anniversary_trans(an, index, text_list)
-        pattern_check(updated_text)
+
 
     if ac:
-        updated_text = general_trans(ac, index, text_list)
+        updated_text = general_trans(ac, index, text_list, None)
         pattern_check(updated_text)
     if kc:
         updated_text = Kca_b_trans(kc, index, text_list)
@@ -212,13 +224,13 @@ for text in text_list:
     # 걸러지지 않은 나머지 숫자들 매치
 
     if general_with_comma:
-        updated_text = general_trans(general_with_comma, index, text_list)
+        updated_text = general_trans(general_with_comma, index, text_list, None)
         pattern_check(updated_text)
     if general_with_point:
-        updated_text = general_trans(general_with_point, index, text_list)
+        updated_text = general_trans(general_with_point, index, text_list, None)
         pattern_check(updated_text)
     if general_only_number:
-        updated_text = general_trans(general_only_number, index, text_list)
+        updated_text = general_trans(general_only_number, index, text_list, None)
         pattern_check(updated_text)
 
 
@@ -245,7 +257,7 @@ for text in result_list:
 
 
 # 정답 비교
-fr_answer = open('1~100_102_correct.txt', 'r', encoding='UTF8')
+fr_answer = open('correct/1~100_100_correct.txt', 'r', encoding='UTF8')
 answer_list = fr_answer.readlines()
 
 
