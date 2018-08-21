@@ -1,6 +1,5 @@
 import re
 
-pattern_only_number = re.compile(r'[,.\d]+')
 
 
 # 한자어
@@ -23,22 +22,18 @@ mark_dict = {'%' : '퍼센트', 'p' : '포인트',
              '℃': '섭씨', '℉': '화씨',
              '+': '플러스', '-': '마이너스', '±': '플러스마이너스',
              '$': '달러', '＄': '달러', '￦': '원', '￥': '엔',
+             'gw': '기가와트', 'w': '와트',
              't': '톤', '㎏': '킬로그램', 'kg': '킬로그램', 'g': '그램',
-             'km': '킬로미터', 'm': '미터', 'cm': '센티미터', 'mm': '밀리미터'}
+             '㎞' : '킬로미터', 'km': '킬로미터', 'cm': '센티미터', 'mm': '밀리미터', 'm': '미터'}
 
 
 percent_dict = {'%p' : '퍼센트포인트', '%' : '퍼센트'}
 temperature_dict = {'℃' : '섭씨', '℉' : '화씨'}
 math_sign_dict = {'+' : '플러스', '-' : '마이너스', '±' : '플러스마이너스'}
 currency_dict = {'$' : '달러', '＄' : '달러', '￦' : '원', '￥' : '엔'}
+watt_dict = {'gw' : '기가와트', 'w' : '와트'}
 weight_dict = {'t' : '톤', '㎏' : '킬로그램', 'kg' : '킬로그램', 'g' : '그램'}
-distance_dict = {'km' : '킬로미터', 'cm' : '센티미터', 'mm' : '밀리미터', 'm' : '미터'}
-
-
-age_possible_list = ['남성', '여성', '남자', '여자', '주부', '지적장애인', '조선족', '대학생', '재력가', '할머니', '할아버지',
-                    '아버지', '어머니', '아들', '딸', '일당', '중국동포', '차량털이범', '초반', '중반', '후반', '교수', '초등',
-                    '정신질환자', '여대생', '용의자', '운전자', '고령', '재력가', '내연녀', '제자', '마약', '노인', '어르신',
-                    '가장', '마을', '주민', '미혼', '기혼', '고교', '고등','청소년']
+distance_dict = {'㎞' : '킬로미터', 'km' : '킬로미터', 'cm' : '센티미터', 'mm' : '밀리미터', 'm' : '미터'}
 
 
 
@@ -67,7 +62,11 @@ def number_unit_trans(nu, index, text_list):
 
         num_len = len(nu_str) - space_len - comma_len - kor_len         # 자리수 예) 6,000 억 => num_len = 4
 
-        word_str = Cca_b_U_trans(nu_str, word_str, num_len)
+
+        if num_len == 1 and '1' in nu_str and '만' in nu_str:
+            word_str = '만'
+        else:
+            word_str = Cca_b_U_trans(nu_str, word_str, num_len)
 
 
 
@@ -477,6 +476,120 @@ def anniversary_trans(an, index, text_list):
 
 
 
+def wave_trans(wa, index, text_list):
+    for i in wa:
+        if type(i) == tuple:
+            wa_str = i[0]
+        elif type(i) == str:
+            wa_str = i
+
+        number_str = wa_str
+        word_str = ''
+        symbol = ''
+
+        symbol_flag = 0
+        symbol_len = 0
+        space_len = 0
+        kor_len = 0
+        num_len = 0
+
+
+        wave_divided_list = wa_str.split('~')
+
+
+        for i in mark_dict:
+            if i in wave_divided_list[0]:
+                symbol = i
+                symbol_kor = mark_dict[i]
+                symbol_len = len(symbol)
+                symbol_flag = 1
+                break
+
+
+        # '퍼센트'같은 우리말이 사용된 경우
+        if symbol_flag == 0:
+            for char in wave_divided_list[0]:
+                if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                    kor_len = kor_len + 1
+                if char == ' ':
+                    space_len = space_len + 1
+
+            num_len = len(wave_divided_list[0]) - kor_len - space_len
+
+
+        # '%'같은 특수문자가 사용된 경우
+        elif symbol_flag == 1:
+            for char in wave_divided_list[0]:
+                if char == ' ':
+                    space_len = space_len + 1
+
+            num_len = len(wave_divided_list[0]) - symbol_len - space_len
+
+            wave_divided_list[0] = wave_divided_list[0].replace(symbol, '')
+
+
+        # '~' 앞 부분 처리
+        word_str = word_str + Cca_b_U_trans(wave_divided_list[0], word_str, num_len)
+
+        if symbol_flag == 1:
+            word_str = word_str + symbol_kor
+
+
+
+        # '~' 문자 변환
+        word_str = word_str + '에서'
+
+
+
+        space_len = 0
+        symbol_len = 0
+        kor_len = 0
+        num_len = 0
+        symbol_flag = 0
+
+        for i in mark_dict:
+            if i in wave_divided_list[1]:
+                symbol = i
+                symbol_kor = mark_dict[i]
+                symbol_len = len(symbol)
+                symbol_flag = 1
+                break
+
+        if symbol_flag == 0:
+            for char in wave_divided_list[1]:
+                if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                    kor_len = kor_len + 1
+                if char == ' ':
+                    space_len = space_len + 1
+
+            num_len = len(wave_divided_list[1]) - kor_len - space_len
+
+        elif symbol_flag == 1:
+            for char in wave_divided_list[1]:
+                if char == ' ':
+                    space_len = space_len + 1
+
+            num_len = len(wave_divided_list[1]) - symbol_len - space_len
+
+            wave_divided_list[1] = wave_divided_list[1].replace(symbol, '')
+
+
+
+        # '~' 뒷 부분 처리
+        word_str = word_str + Cca_b_U_trans(wave_divided_list[1], '', num_len)
+
+        if symbol_flag == 1:
+            word_str = word_str + symbol_kor
+
+
+
+        translated_str = text_list[index].replace(number_str, word_str, 1)
+        text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
+
+
+    return text_list[index]
+
+
 # 관형어 고유어 변환
 # 50미만은 고유어 수사
 # 50이상은 Cca_b_U_trans함수 호출해서 한자어 수사 처리..
@@ -739,7 +852,7 @@ def general_trans(u, index, text_list, pattern):
 
 
 
-        # 나이를 뜻하는 '대' 일 경우가 아닌 차량 대수를 뜻하는 경우에는 지금 처리하지 않고 나중에 kc패턴에서 처리한다.
+        # 나이를 뜻하는 '대' 인 경우가 아닌 차량 대수를 뜻하는 경우에는 지금 처리하지 않고 나중에 kc패턴에서 처리한다.
         if pattern == 'ad' and age_flag == 0:
             continue
 
@@ -789,6 +902,14 @@ def general_trans(u, index, text_list, pattern):
                     symbol = currency_dict[i]
                     unit_len = len(i)
                     currency_flag = 1
+                    no_more = 1
+                    break
+
+        if no_more == 0:
+            for i in watt_dict:
+                if i in u_str:
+                    symbol = watt_dict[i]
+                    unit_len = len(i)
                     no_more = 1
                     break
 
