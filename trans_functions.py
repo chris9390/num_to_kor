@@ -476,7 +476,7 @@ def anniversary_trans(an, index, text_list):
 
 
 
-def wave_trans(wa, index, text_list):
+def wave_anc_trans(wa, index, text_list):
     for i in wa:
         if type(i) == tuple:
             wa_str = i[0]
@@ -496,7 +496,7 @@ def wave_trans(wa, index, text_list):
 
         wave_divided_list = wa_str.split('~')
 
-
+        # '~' 앞 부분 처리
         for i in mark_dict:
             if i in wave_divided_list[0]:
                 symbol = i
@@ -528,7 +528,6 @@ def wave_trans(wa, index, text_list):
             wave_divided_list[0] = wave_divided_list[0].replace(symbol, '')
 
 
-        # '~' 앞 부분 처리
         word_str = word_str + Cca_b_U_trans(wave_divided_list[0], word_str, num_len)
 
         if symbol_flag == 1:
@@ -547,6 +546,7 @@ def wave_trans(wa, index, text_list):
         num_len = 0
         symbol_flag = 0
 
+        # '~' 뒷 부분 처리
         for i in mark_dict:
             if i in wave_divided_list[1]:
                 symbol = i
@@ -575,7 +575,6 @@ def wave_trans(wa, index, text_list):
 
 
 
-        # '~' 뒷 부분 처리
         word_str = word_str + Cca_b_U_trans(wave_divided_list[1], '', num_len)
 
         if symbol_flag == 1:
@@ -590,127 +589,112 @@ def wave_trans(wa, index, text_list):
     return text_list[index]
 
 
-# 관형어 고유어 변환
-# 50미만은 고유어 수사
-# 50이상은 Cca_b_U_trans함수 호출해서 한자어 수사 처리..
-# 3 마리 -> 세 마리, 50 마리-> 오십 마리
-def Kca_b_trans(kca, index, text_list):
-    for i in kca:
 
+def wave_kor_trans(wk, index, text_list):
+    for i in wk:
         if type(i) == tuple:
-            kca_str = i[0]
+            wk_str = i[0]
         elif type(i) == str:
-            kca_str = i
+            wk_str = i
 
-
-        number_str = kca_str
+        number_str = wk_str
         word_str = ''
+
         kor_len = 0
-        unit_flag = 0
+        space_len = 0
+        symbol_before_flag = 0
         Cca_should_work = 0
 
-        space_count = kca_str.count(' ')            # 공백 개수
-        comma_count = kca_str.count(',')            # ',' 개수
-        #kca_str = kca_str.replace(',', '')          # 숫자 3자리 마다 있는 ',' 제거
+
+        wave_divided_list = wk_str.split('~')
 
 
+        symbol_before = ''
+        for char in wave_divided_list[0]:
+            if (ord(char) >= ord('가') and ord(char) <= ord('힣')):
+                symbol_before_flag = 1
+                symbol_before = symbol_before + char
 
-        # 추출된 패턴에서 한글길이를 세어준다.
-        for char in kca_str:
-            if ord(char) >= ord('가') and ord(char) <= ord('힣'):
-                kor_len = kor_len + 1
-
-        '''
-        if '시간' in kca_str or '군데' in kca_str or '마리' in kca_str or '가지' in kca_str or '사람' in kca_str or '개사' in kca_str:
-            kor_len = 2
-
-        elif '명' in kca_str or '시' in kca_str or '개' in kca_str or '살' in kca_str or '달' in kca_str or '해' in kca_str\
-                or '곳' in kca_str or '배' in kca_str or '대' in kca_str or '장' in kca_str or '갑' in kca_str:
-            kor_len = 1                                            # 2'살' or 10'시' 1글자
-        '''
-
-        num_len = len(kca_str) - space_count - comma_count - kor_len         # 숫자만의 길이. 공백, 콤마 개수 빼준다.
-        len_checker = num_len
+        # '10~60명' 의 예에서 num_before는 '10'에 해당
+        num_before = wave_divided_list[0].replace(symbol_before, '')
 
 
-        # 여기서 숫자 부분의 크기를 측정해서 50이상은 Cca함수 호출 / 50미만은 이 밑의 과정
-        if (num_len == 2 and int(kca_str[0]) >= 5) or num_len >= 3:
-            Cca_should_work = 1
+        symbol_after = ''
+        for char in wave_divided_list[1]:
+            if (ord(char) >= ord('가') and ord(char) <= ord('힣')):
+                symbol_after = symbol_after + char
+
+        # '10~60명' 의 예에서 num_after는 '60'에 해당
+        num_after = wave_divided_list[1].replace(symbol_after, '')
 
 
+        num_diff = int(num_after) - int(num_before)
 
-        # 숫자가 50이상인 경우
-        if Cca_should_work == 1:
-            word_str = Cca_b_U_trans(kca_str, word_str, num_len)
 
-        # 숫자가 50미만인 경우
+        # 2~3명 => 두세명   이런 경우
+        if num_diff == 1 and len(num_before) == 1 and len(num_after) == 1:
+            word_str = word_str + Kca_b_trans(num_before, word_str, len(num_before))
+            word_str = word_str + Kca_b_trans(num_after, '', len(num_after))
+            word_str = word_str + symbol_after
+
+
+        # 10 ~ 60명 => 십 에서 육십명   이런 경우
         else:
-            for char in kca_str:
-                if (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
-                    word_str = word_str + char
 
-                elif char == ',':
-                    continue
+            # '~' 앞 부분 처리
+            for char in wave_divided_list[0]:
+                if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                    kor_len = kor_len + 1
+                if char == ' ':
+                    space_len = space_len + 1
 
-                # 0시 같은 경우
-                elif char == '0' and num_len == 1:
-                    word_str = word_str +'영'
+            num_len = len(wave_divided_list[0]) - kor_len - space_len
 
-                elif char == '0' and num_len != 1:
-                    continue
 
+            # '10명 ~ 60명' 이렇게 앞부분의 숫자에도 분류사가 있는 경우
+            if symbol_before_flag == 1:
+                if (num_len == 2 and int(num_before) >= 5) or num_len >= 3:
+                    Cca_should_work = 1
+
+                if Cca_should_work == 1:
+                    word_str = Cca_b_U_trans(num_before, word_str, num_len)
+                    word_str = word_str + symbol_before
                 else:
-                    # 자리수가 2일때 부터 Kca 로 바꿔준다. 2보다 클땐 Cca_b[+U]로 읽는다.
-                    # Kca_b
-                    if len_checker == 2:
-                        word_str = word_str + Kca_b_10_dict[char]
-                    elif len_checker == 1:
-                        word_str = word_str + Kca_b_dict[char]
+                    word_str = Kca_b_trans(num_before, word_str, num_len)
+                    word_str = word_str + symbol_before
 
-                    # Cca_b[+U]
-                    else:
-                        if char == '0':
+            # '10 ~ 60명'
+            else:
+                word_str = Cca_b_U_trans(num_before, word_str, num_len)
+                word_str = word_str + symbol_before
 
-                            if len_checker == 5 and unit_flag == 1:
-                                word_str = word_str + '만'
-                                unit_flag = 0
-                            elif len_checker == 9 and unit_flag == 1:
-                                word_str = word_str + '억'
-                                unit_flag = 0
-                            elif len_checker == 13 and unit_flag == 1:
-                                word_str = word_str + '조'
-                                unit_flag = 0
 
-                            len_checker = len_checker - 1
 
-                            continue
 
-                        elif char == '1':
-                            # 일, 만, 억, 조 단위는 1도 '일'이라고 말해줘야 한다.
-                            if len_checker == 1 or len_checker == 5 or len_checker == 9 or len_checker == 13:
+            # '~' 문자 변환
+            word_str = word_str + '에서'
 
-                                if len_checker == 5 and num_len == len_checker:  # 5자리 숫자에서 만의 자리가 1이면 '일' 붙이면 안된다.
-                                    print('')  # 아무 작업도 안함
-                                else:
-                                    word_str = word_str + '일'
 
-                            word_str = word_str + unit_dict[str(len_checker)]  # 그 외에는 1말하지 않음. 예) 100 => 백
-                            unit_flag = 1
-                        else:
-                            word_str = word_str + ancient_dict[char] + unit_dict[str(len_checker)]
-                            unit_flag = 1
+            kor_len = 0
+            space_len = 0
+            #Cca_should_work = 0
 
-                        if len_checker == 5:
-                            word_str = word_str + '만'
-                            unit_flag = 0
-                        elif len_checker == 9:
-                            word_str = word_str + '억'
-                            unit_flag = 0
-                        elif len_checker == 13:
-                            word_str = word_str + '조'
-                            unit_flag = 0
 
-                len_checker = len_checker - 1
+            # '~' 뒷 부분 처리
+            for char in wave_divided_list[1]:
+                if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                    kor_len = kor_len + 1
+                if char == ' ':
+                    space_len = space_len + 1
+
+            num_len = len(wave_divided_list[1]) - kor_len - space_len
+
+
+
+            word_str = Cca_b_U_trans(num_after, word_str, num_len)
+            word_str = word_str + symbol_after
+
+
 
 
         translated_str = text_list[index].replace(number_str, word_str, 1)
@@ -720,13 +704,144 @@ def Kca_b_trans(kca, index, text_list):
 
 
 
+# 50미만은 Kca_b_trans함수 호출해서 고유어 수사 처리
+# 50이상은 Cca_b_U_trans함수 호출해서 한자어 수사 처리
+# 3 마리 -> 세 마리, 50 마리-> 오십 마리
+def kor_anc_trans(koranc, index, text_list):
+    for i in koranc:
+
+        if type(i) == tuple:
+            koranc_str = i[0]
+        elif type(i) == str:
+            koranc_str = i
+
+        number_str = koranc_str
+        word_str = ''
+        kor_len = 0
+        Cca_should_work = 0
+
+        space_len = koranc_str.count(' ')  # 공백 개수
+        comma_len = koranc_str.count(',')  # ',' 개수
+
+        # 추출된 패턴에서 한글길이를 세어준다.
+        for char in koranc_str:
+            if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                kor_len = kor_len + 1
+
+        num_len = len(koranc_str) - space_len - comma_len - kor_len  # 숫자만의 길이. 공백, 콤마 개수 빼준다.
+
+
+        # 여기서 숫자 부분의 크기를 측정해서 50이상은 Cca함수 호출 / 50미만은 이 밑의 과정
+        if (num_len == 2 and int(koranc_str[0]) >= 5) or num_len >= 3:
+            Cca_should_work = 1
+
+        # 숫자가 50이상인 경우
+        if Cca_should_work == 1:
+            word_str = Cca_b_U_trans(koranc_str, word_str, num_len)
+
+        # 숫자가 50미만인 경우
+        else:
+            word_str = Kca_b_trans(koranc_str, word_str, num_len)
+
+
+
+        translated_str = text_list[index].replace(number_str, word_str, 1)
+        text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
+
+    return text_list[index]
+
+
+# Kca_b 로 읽는 경우
+# 관형어 고유어 변환
+# 1 -> 한,  10 -> 열
+#def Kca_b_trans(kca, index, text_list):
+def Kca_b_trans(input_str, output_str, length):
+
+    kca_str = input_str
+    word_str = output_str
+    num_len = length
+    len_checker = num_len
+    unit_flag = 0
+
+
+    for char in kca_str:
+        if (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
+            word_str = word_str + char
+
+        elif char == ',':
+            continue
+
+        # 0시 같은 경우
+        elif char == '0' and num_len == 1:
+            word_str = word_str +'영'
+
+        elif char == '0' and num_len != 1:
+            continue
+
+        else:
+            # 자리수가 2일때 부터 Kca 로 바꿔준다. 2보다 클땐 Cca_b[+U]로 읽는다.
+            # Kca_b
+            if len_checker == 2:
+                word_str = word_str + Kca_b_10_dict[char]
+            elif len_checker == 1:
+                word_str = word_str + Kca_b_dict[char]
+
+            # Cca_b[+U]
+            else:
+                if char == '0':
+
+                    if len_checker == 5 and unit_flag == 1:
+                        word_str = word_str + '만'
+                        unit_flag = 0
+                    elif len_checker == 9 and unit_flag == 1:
+                        word_str = word_str + '억'
+                        unit_flag = 0
+                    elif len_checker == 13 and unit_flag == 1:
+                        word_str = word_str + '조'
+                        unit_flag = 0
+
+                    len_checker = len_checker - 1
+
+                    continue
+
+                elif char == '1':
+                    # 일, 만, 억, 조 단위는 1도 '일'이라고 말해줘야 한다.
+                    if len_checker == 1 or len_checker == 5 or len_checker == 9 or len_checker == 13:
+
+                        if len_checker == 5 and num_len == len_checker:  # 5자리 숫자에서 만의 자리가 1이면 '일' 붙이면 안된다.
+                            print('')  # 아무 작업도 안함
+                        else:
+                            word_str = word_str + '일'
+
+                    word_str = word_str + unit_dict[str(len_checker)]  # 그 외에는 1말하지 않음. 예) 100 => 백
+                    unit_flag = 1
+                else:
+                    word_str = word_str + ancient_dict[char] + unit_dict[str(len_checker)]
+                    unit_flag = 1
+
+                if len_checker == 5:
+                    word_str = word_str + '만'
+                    unit_flag = 0
+                elif len_checker == 9:
+                    word_str = word_str + '억'
+                    unit_flag = 0
+                elif len_checker == 13:
+                    word_str = word_str + '조'
+                    unit_flag = 0
+
+        len_checker = len_checker - 1
+
+    return word_str
+
+
+
 
 
 # Cca_b[+U] 로 읽는 경우
 # 315 => 삼백십오  이런식으로 변환해준다.
 def Cca_b_U_trans(input_str, output_str, length):
 
-    new_u_str = input_str
+    cca_str = input_str
     word_str = output_str
     original_len = length
     unit_len = length           # 단위 제외 숫자만의 길이 ('12 개월' => unit_len = 2)
@@ -734,12 +849,12 @@ def Cca_b_U_trans(input_str, output_str, length):
     no_more = 0
 
 
-    for char in new_u_str:
-        if '10' in new_u_str and '월' in new_u_str and no_more == 0:
+    for char in cca_str:
+        if '10' in cca_str and '월' in cca_str and no_more == 0:
             word_str = word_str + '시'
             no_more = 1
 
-        elif '6' in new_u_str and '월' in new_u_str and no_more == 0:
+        elif '6' in cca_str and '월' in cca_str and no_more == 0:
             word_str = word_str + '유'
             no_more = 1
 
@@ -827,25 +942,26 @@ def Cca_b_U_trans(input_str, output_str, length):
 
 
 # 위의 패턴들에 해당하지 않는 나머지 숫자(온도, 화폐, 퍼센트 등등 포함) 읽는 법
-def general_trans(u, index, text_list, pattern):
+#def general_trans(u, index, text_list, pattern):
+def anc_trans(anc, index, text_list, pattern):
 
-    for i in u:
+    for i in anc:
         if type(i) == tuple:
-            u_str = i[0]
+            anc_str = i[0]
         elif type(i) == str:
-            u_str = i
+            anc_str = i
 
         age_flag = 0
         generation_flag = 0
 
         for j in human:
-            if j in u_str:
+            if j in anc_str:
                 age_flag = 1
                 break
 
 
         for j in generation:
-            if j in u_str:
+            if j in anc_str:
                 generation_flag = 1
                 break
 
@@ -866,19 +982,19 @@ def general_trans(u, index, text_list, pattern):
         symbol = ''
         no_more = 0
 
-        number_str = u_str
+        number_str = anc_str
         word_str = ''
 
         kor_len = 0
         unit_len = 0
 
-        u_str = u_str.lower()
+        anc_str = anc_str.lower()
 
 
 
         if no_more == 0:
             for i in temperature_dict:
-                if i in u_str:
+                if i in anc_str:
                     temperature_flag = 1
                     word_str = word_str + temperature_dict[i] + ' '
                     symbol = '도'
@@ -889,7 +1005,7 @@ def general_trans(u, index, text_list, pattern):
 
         if no_more == 0:
             for i in percent_dict:
-                if i in u_str:
+                if i in anc_str:
                     symbol = percent_dict[i]
                     unit_len = len(i)
                     no_more = 1
@@ -897,7 +1013,7 @@ def general_trans(u, index, text_list, pattern):
 
         if no_more == 0:
             for i in currency_dict:
-                if i in u_str:
+                if i in anc_str:
                     #cs = i
                     symbol = currency_dict[i]
                     unit_len = len(i)
@@ -907,7 +1023,7 @@ def general_trans(u, index, text_list, pattern):
 
         if no_more == 0:
             for i in watt_dict:
-                if i in u_str:
+                if i in anc_str:
                     symbol = watt_dict[i]
                     unit_len = len(i)
                     no_more = 1
@@ -915,7 +1031,7 @@ def general_trans(u, index, text_list, pattern):
 
         if no_more == 0:
             for i in weight_dict:
-                if i in u_str:
+                if i in anc_str:
                     symbol = weight_dict[i]
                     unit_len = len(i)
                     no_more = 1
@@ -923,7 +1039,7 @@ def general_trans(u, index, text_list, pattern):
 
         if no_more == 0:
             for i in distance_dict:
-                if i in u_str:
+                if i in anc_str:
                     symbol = distance_dict[i]
                     unit_len = len(i)
                     no_more = 1
@@ -933,14 +1049,14 @@ def general_trans(u, index, text_list, pattern):
 
         # -, + 같은 기호는 다른 기호와 함께 나올 수 있으므로 no_more 조건문 없어야한다.
         for i in math_sign_dict:
-            if i in u_str:
+            if i in anc_str:
                 word_str = word_str + math_sign_dict[i]
                 unit_len = unit_len + len(i)
                 break
 
 
         # 추출된 패턴에서 한글길이를 세어준다.
-        for char in u_str:
+        for char in anc_str:
             if ord(char) >= ord('가') and ord(char) <= ord('힣'):
                 kor_len = kor_len + 1
 
@@ -968,25 +1084,25 @@ def general_trans(u, index, text_list, pattern):
         ############################################
 
 
-        new_u_str = u_str.replace(',', '')        # new_cu_str 은 ',' 제거한 문자열
-        new_u_str = new_u_str.replace('\n', '')
+        new_anc_str = anc_str.replace(',', '')        # new_cu_str 은 ',' 제거한 문자열
+        new_anc_str = new_anc_str.replace('\n', '')
 
 
         # 소수점 없는 경우
-        if '.' not in new_u_str:
+        if '.' not in new_anc_str:
 
-            space_count = new_u_str.count(' ')        # 공백 개수
-            num_len = len(new_u_str) - kor_len - space_count - unit_len
+            space_count = new_anc_str.count(' ')        # 공백 개수
+            num_len = len(new_anc_str) - kor_len - space_count - unit_len
 
 
 
-            word_str = Cca_b_U_trans(new_u_str, word_str, num_len)
+            word_str = Cca_b_U_trans(new_anc_str, word_str, num_len)
 
 
         # 소수점 있는 경우
-        elif '.' in new_u_str:
+        elif '.' in new_anc_str:
             # 소수점 기준으로 앞 부분과 뒷 부분으로 나눈다.
-            point_divided_list = new_u_str.split('.')
+            point_divided_list = new_anc_str.split('.')
 
             space_count = point_divided_list[0].count(' ')        # 소수점 앞의 공백 개수
 
@@ -996,7 +1112,7 @@ def general_trans(u, index, text_list, pattern):
             if currency_flag == 1:                          # -1 하는 이유는 화폐 기호 때문.
                 num_len = num_len - 1
 
-            if '-' in new_u_str or '+' in new_u_str or '±' in new_u_str:        # -36.5 이면 소수점 앞의 자리수는 3이 아니라 2
+            if '-' in new_anc_str or '+' in new_anc_str or '±' in new_anc_str:        # -36.5 이면 소수점 앞의 자리수는 3이 아니라 2
                 num_len = num_len - 1
 
             # 앞부분은 단위 따져가며 읽어야한다.

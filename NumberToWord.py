@@ -8,7 +8,13 @@ start_time = time.time()
 
 # 3 ~ 4 년 -> 삼 에서 사 년
 # 30 ~ 40 % -> 삼십 에서 사십 퍼센트
-pattern_wave_anc = re.compile(r'(\d+.*\s*[~]\s*\d+.*\s*((퍼센트|개월|개년|원|년|일|세|월)|(%p|%|t|㎏|kg|gw|w|g|㎞|km|cm|mm|m)))')
+pattern_wave_anc = re.compile(r'(\d+.*\s*[~]\s*\d+.*\s*((퍼센트|개월|개년|원|년|일|세|월)|(%p|%|t|㎏|kg|gw|w|g|㎞|km|cm|mm|m)))', re.IGNORECASE)
+
+# 1~2명 -> 한두명
+# 50이상일때는 한자어로 읽는다.
+# 60 ~ 80 마리 -> 육십 에서 팔십 마리
+pattern_wave_kor = re.compile(r'(\d+.*\s*[~]\s*\d+.*\s*(시간|군데|마리|가지|사람|개사|보루|명|시|개|살|달|해|곳|배|대|장|갑))')
+
 
 
 #age_possible_list = '(남성|여성|남자|여자|주부|지적장애인|조선족|대학생|재력가|할머니|할아버지|아버지|어머니|아들|딸|' \
@@ -106,12 +112,13 @@ result_list = []            # 변환된 결과 text 저장용
 
 def pattern_check(text):
 
-    global wa, ad, ge, nu, ck, pn_NNA, pn, cn, rn, ip, tn, cu, te, da, on, an, ac, kc, \
+    global wa, wk, ad, ge, nu, ck, pn_NNA, pn, cn, rn, ip, tn, cu, te, da, on, an, ac, kc, \
         general_only_number, general_with_point, general_with_comma
 
     # 패턴화된 결합구조들
     #########################################################
     wa = pattern_wave_anc.findall(text)     # '~' 과 한자어
+    wk = pattern_wave_kor.findall(text)     # '~' 와 고유어 / 한자어
     ad = pattern_age_with_dae.findall(text) # '대'가 붙은 나이
     ge = pattern_generation.findall(text)           # 세대
     nu = pattern_number_unit.findall(text)  # 숫자 단위
@@ -174,15 +181,17 @@ for text in text_list:
 
     # 패턴화된 결합구조로 일단 걸러낸다.
     if wa:
-        updated_text = wave_trans(wa, index, text_list)
+        updated_text = wave_anc_trans(wa, index, text_list)
+        pattern_check(updated_text)
+    if wk:
+        updated_text = wave_kor_trans(wk, index, text_list)
         pattern_check(updated_text)
 
     if ad:
-        updated_text = general_trans(ad, index, text_list, 'ad')
+        updated_text = anc_trans(ad, index, text_list, 'ad')
         pattern_check(updated_text)
-
     if ge:
-        updated_text = general_trans(ge, index, text_list, 'ge')
+        updated_text = anc_trans(ge, index, text_list, 'ge')
         pattern_check(updated_text)
     if an:
         updated_text = anniversary_trans(an, index, text_list)
@@ -215,10 +224,10 @@ for text in text_list:
         updated_text = date_trans(da, index, text_list)
         pattern_check(updated_text)
     if cu:
-        updated_text = general_trans(cu, index, text_list, None)
+        updated_text = anc_trans(cu, index, text_list, None)
         pattern_check(updated_text)
     if te:
-        updated_text = general_trans(te, index, text_list, None)
+        updated_text = anc_trans(te, index, text_list, None)
         pattern_check(updated_text)
     if on:
         updated_text = order_trans(on, index, text_list)
@@ -226,23 +235,23 @@ for text in text_list:
 
 
     if ac:
-        updated_text = general_trans(ac, index, text_list, None)
+        updated_text = anc_trans(ac, index, text_list, None)
         pattern_check(updated_text)
     if kc:
-        updated_text = Kca_b_trans(kc, index, text_list)
+        updated_text = kor_anc_trans(kc, index, text_list)
         pattern_check(updated_text)
 
 
     # 걸러지지 않은 나머지 숫자들 매치
 
     if general_with_comma:
-        updated_text = general_trans(general_with_comma, index, text_list, None)
+        updated_text = anc_trans(general_with_comma, index, text_list, None)
         pattern_check(updated_text)
     if general_with_point:
-        updated_text = general_trans(general_with_point, index, text_list, None)
+        updated_text = anc_trans(general_with_point, index, text_list, None)
         pattern_check(updated_text)
     if general_only_number:
-        updated_text = general_trans(general_only_number, index, text_list, None)
+        updated_text = anc_trans(general_only_number, index, text_list, None)
         pattern_check(updated_text)
 
 
