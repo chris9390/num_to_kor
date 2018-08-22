@@ -8,11 +8,12 @@ import re
 pattern_kor = re.compile(r'[^0-9]*')
 pattern_short = re.compile(r'[1-9]0대\s*[가-힣]{0,10}')
 pattern_long = re.compile(r'[가-힣]{0,10}\s*[가-힣]{0,10}\s*[1-9]0대\s*[가-힣]{0,10}\s*[가-힣]{0,10}')
+pattern_wave = re.compile(r'\D{0,10}\s*\d+\s*\D{0,5}\s*[~]\s*\d+\s*\D{0,10}')
 
 
-fr = open('/home/s20131533/pycharm_numbertoword/filtered/대_filtered.txt', 'r', encoding='UTF8')
+fr = open('/home/s20131533/pycharm_numbertoword/filtered/103_237_filtered.txt', 'r', encoding='UTF8')
 #fw = open('filtered/103_237_filtered.txt', 'w')
-fw = open('대_nouns.txt','w')
+fw = open('wave.txt','w')
 
 total = fr.readlines()
 
@@ -27,23 +28,24 @@ ambiguous = ['모두', '이상', '이하', '조사', '이후', '등']
 
 count = 0
 for i in total:
-    #if count == 1000:
+    #if count == 200:
     #    break
 
     text_list.append(i)
 
     count = count + 1
 
-'''
+
 for text in text_list:
-    s = pattern_kor.search(text)
-    if s.group() != text:
-        #print(text)
-        fw.write(text)
+    s = pattern_wave.findall(text)
+    if s:
+        for i in s:
+            fw.write(i + '\n')
     else:
         print('only text')
-'''
 
+
+'''
 noun_list = []
 noun_str_list = []
 
@@ -72,7 +74,7 @@ for text in text_list:
 
 print(noun_list)
 print('\n총 개수 : ' + str(len(noun_list)))
-
+'''
 
 fr.close()
 fw.close()

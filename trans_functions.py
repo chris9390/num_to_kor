@@ -1,5 +1,5 @@
 import re
-
+pattern_wave_with_space = re.compile(r'\s*[~]\s*')
 
 
 # 한자어
@@ -494,6 +494,15 @@ def wave_anc_trans(wa, index, text_list):
         num_len = 0
 
 
+
+        # 물결('~') 양옆의 공백 제거
+        wws = pattern_wave_with_space.findall(wa_str)
+        for i in wws:
+            wa_str = wa_str.replace(i, '~')
+
+
+
+
         wave_divided_list = wa_str.split('~')
 
         # '~' 앞 부분 처리
@@ -605,15 +614,27 @@ def wave_kor_trans(wk, index, text_list):
         symbol_before_flag = 0
         Cca_should_work = 0
 
+        space_before = 0
+        space_after = 0
+
+
+        # 물결('~') 양옆의 공백 제거
+        wws = pattern_wave_with_space.findall(wk_str)
+        for i in wws:
+            wk_str = wk_str.replace(i, '~')
+
 
         wave_divided_list = wk_str.split('~')
 
 
         symbol_before = ''
         for char in wave_divided_list[0]:
-            if (ord(char) >= ord('가') and ord(char) <= ord('힣')):
+            if (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
                 symbol_before_flag = 1
                 symbol_before = symbol_before + char
+
+            #if char == ' ':
+            #    space_before = space_before + 1
 
         # '10~60명' 의 예에서 num_before는 '10'에 해당
         num_before = wave_divided_list[0].replace(symbol_before, '')
@@ -621,8 +642,11 @@ def wave_kor_trans(wk, index, text_list):
 
         symbol_after = ''
         for char in wave_divided_list[1]:
-            if (ord(char) >= ord('가') and ord(char) <= ord('힣')):
+            if (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
                 symbol_after = symbol_after + char
+
+            #if char == ' ':
+            #    space_after = space_after + 1
 
         # '10~60명' 의 예에서 num_after는 '60'에 해당
         num_after = wave_divided_list[1].replace(symbol_after, '')
@@ -630,20 +654,23 @@ def wave_kor_trans(wk, index, text_list):
 
         num_diff = int(num_after) - int(num_before)
 
+        num_before_len = len(num_before) #- space_before
+        num_after_len = len(num_after) #- space_after
 
         # 2~3명 => 두세명   이런 경우
-        if num_diff == 1 and len(num_before) == 1 and len(num_after) == 1:
-            word_str = word_str + Kca_b_trans(num_before, word_str, len(num_before))
-            word_str = word_str + Kca_b_trans(num_after, '', len(num_after))
+        if num_diff == 1 and num_before_len == 1 and num_after_len == 1 and symbol_before_flag == 0:
+            word_str = word_str + Kca_b_trans(num_before, word_str, num_before_len)
+            word_str = word_str + Kca_b_trans(num_after, '', num_after_len)
             word_str = word_str + symbol_after
 
 
         # 10 ~ 60명 => 십 에서 육십명   이런 경우
+        # 10명 ~ 60명 => 열명 에서 육십명
         else:
 
             # '~' 앞 부분 처리
             for char in wave_divided_list[0]:
-                if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                if (ord(char) >= ord('가') and ord(char) <= ord('힣')):
                     kor_len = kor_len + 1
                 if char == ' ':
                     space_len = space_len + 1
@@ -653,20 +680,25 @@ def wave_kor_trans(wk, index, text_list):
 
             # '10명 ~ 60명' 이렇게 앞부분의 숫자에도 분류사가 있는 경우
             if symbol_before_flag == 1:
-                if (num_len == 2 and int(num_before) >= 5) or num_len >= 3:
+                #if (num_len == 2 and int(num_before) >= 5) or num_len >= 3:
+                if int(num_before) >= 50:
                     Cca_should_work = 1
 
                 if Cca_should_work == 1:
-                    word_str = Cca_b_U_trans(num_before, word_str, num_len)
-                    word_str = word_str + symbol_before
+                    word_str = Cca_b_U_trans(wave_divided_list[0], word_str, num_len)
+                    #word_str = Cca_b_U_trans(num_before, word_str, num_len)
+                    #word_str = word_str + symbol_before
+
                 else:
-                    word_str = Kca_b_trans(num_before, word_str, num_len)
-                    word_str = word_str + symbol_before
+                    word_str = Kca_b_trans(wave_divided_list[0], word_str, num_len)
+                    #word_str = Kca_b_trans(num_before, word_str, num_len)
+                    #word_str = word_str + symbol_before
 
             # '10 ~ 60명'
             else:
-                word_str = Cca_b_U_trans(num_before, word_str, num_len)
-                word_str = word_str + symbol_before
+                word_str = Cca_b_U_trans(wave_divided_list[0], word_str, num_len)
+                #word_str = Cca_b_U_trans(num_before, word_str, num_len)
+                #word_str = word_str + symbol_before
 
 
 
@@ -691,9 +723,49 @@ def wave_kor_trans(wk, index, text_list):
 
 
 
-            word_str = Cca_b_U_trans(num_after, word_str, num_len)
-            word_str = word_str + symbol_after
+            if symbol_before_flag == 1:
+                #if (num_len == 2 and int(num_before) >= 5) or num_len >= 3:
+                if int(num_after) >= 50:
+                    Cca_should_work = 1
 
+                if Cca_should_work == 1:
+                    word_str = Cca_b_U_trans(wave_divided_list[1], word_str, num_len)
+                    #word_str = Cca_b_U_trans(num_after, word_str, num_len)
+                    #word_str = word_str + symbol_after
+
+                else:
+                    word_str = Kca_b_trans(wave_divided_list[1], word_str, num_len)
+                    #word_str = Kca_b_trans(num_after, word_str, num_len)
+                    #word_str = word_str + symbol_after
+
+
+            else:
+                word_str = Cca_b_U_trans(wave_divided_list[1], word_str, num_len)
+                #word_str = Cca_b_U_trans(num_after, word_str, num_len)
+                #word_str = word_str + symbol_after
+
+
+
+
+        translated_str = text_list[index].replace(number_str, word_str, 1)
+        text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
+
+    return text_list[index]
+
+
+
+def wave_else(we, index, text_list):
+    for i in we:
+
+        if type(i) == tuple:
+            we_str = i[0]
+        elif type(i) == str:
+            we_str = i
+
+        number_str = we_str
+        word_str = ''
+
+        word_str = we_str.replace('~', '에서')
 
 
 
@@ -767,6 +839,7 @@ def Kca_b_trans(input_str, output_str, length):
     for char in kca_str:
         if (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
             word_str = word_str + char
+            continue
 
         elif char == ',':
             continue
@@ -774,6 +847,7 @@ def Kca_b_trans(input_str, output_str, length):
         # 0시 같은 경우
         elif char == '0' and num_len == 1:
             word_str = word_str +'영'
+            continue
 
         elif char == '0' and num_len != 1:
             continue

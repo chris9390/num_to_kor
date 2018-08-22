@@ -8,14 +8,16 @@ start_time = time.time()
 
 # 3 ~ 4 년 -> 삼 에서 사 년
 # 30 ~ 40 % -> 삼십 에서 사십 퍼센트
-pattern_wave_anc = re.compile(r'(\d+.*\s*[~]\s*\d+.*\s*((퍼센트|개월|개년|원|년|일|세|월)|(%p|%|t|㎏|kg|gw|w|g|㎞|km|cm|mm|m)))', re.IGNORECASE)
+pattern_wave_anc = re.compile(r'(\d+\s*\D{0,2}\s*[~]\s*\d+\s*\D{0,2}\s*((퍼센트|개월|개년|원|년|일|세|월)|(%p|%|t|㎏|kg|gw|w|g|㎞|km|cm|mm|m)))', re.IGNORECASE)
 
 # 1~2명 -> 한두명
 # 50이상일때는 한자어로 읽는다.
 # 60 ~ 80 마리 -> 육십 에서 팔십 마리
-pattern_wave_kor = re.compile(r'(\d+.*\s*[~]\s*\d+.*\s*(시간|군데|마리|가지|사람|개사|보루|명|시|개|살|달|해|곳|배|대|장|갑))')
+pattern_wave_kor = re.compile(r'(\d+\s*\D{0,2}\s*[~]\s*\d+\s*\D{0,2}\s*(시간|군데|마리|가지|사람|개사|보루|명|시|개|살|달|해|곳|배|대|장|갑|건))')
 
-
+# 나머지 물결 패턴 모두 처리
+# 여기서는 물결('~')만 '에서'로 바꿔준다.
+pattern_wave_else = re.compile(r'\d+\D*\s*[~]\s*\D*\d+')
 
 #age_possible_list = '(남성|여성|남자|여자|주부|지적장애인|조선족|대학생|재력가|할머니|할아버지|아버지|어머니|아들|딸|' \
 #                '일당|중국동포|차량털이범|초반|중반|후반|교수|초등|정신질환자|여대생|용의자|운전자|고령|재력가|' \
@@ -83,7 +85,7 @@ pattern_anc_with_classifier = re.compile(r'(\d+(,\d{3})*\s*(퍼센트|(개월|�
 
 # 50미만 고유어 수사, 50이상 한자어 수사 + 분류사
 #예) 3 마리 -> 세 마리, 52 마리 -> 오십이 마리
-pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사|보루)|[명시개살달해곳배대장갑]))')
+pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사|보루)|[명시개살달해곳배대장갑건]))')
 
 
 
@@ -112,13 +114,14 @@ result_list = []            # 변환된 결과 text 저장용
 
 def pattern_check(text):
 
-    global wa, wk, ad, ge, nu, ck, pn_NNA, pn, cn, rn, ip, tn, cu, te, da, on, an, ac, kc, \
+    global wa, wk, we, ad, ge, nu, ck, pn_NNA, pn, cn, rn, ip, tn, cu, te, da, on, an, ac, kc, \
         general_only_number, general_with_point, general_with_comma
 
     # 패턴화된 결합구조들
     #########################################################
     wa = pattern_wave_anc.findall(text)     # '~' 과 한자어
     wk = pattern_wave_kor.findall(text)     # '~' 와 고유어 / 한자어
+    we = pattern_wave_else.findall(text)    # 물결 패턴 나머지
     ad = pattern_age_with_dae.findall(text) # '대'가 붙은 나이
     ge = pattern_generation.findall(text)           # 세대
     nu = pattern_number_unit.findall(text)  # 숫자 단위
@@ -158,7 +161,7 @@ total = fr.readlines()
 # 입력 파일을 읽어서 text_list 에 추가
 count = 0
 for i in total:
-    if count == 100:
+    if count == 10000:
         break
 
     # 원본
@@ -175,7 +178,7 @@ index = 0
 for text in text_list:
 
     pattern_check(text)
-    #print(str(index+1))
+    print(str(index+1))
 
 
 
@@ -185,6 +188,9 @@ for text in text_list:
         pattern_check(updated_text)
     if wk:
         updated_text = wave_kor_trans(wk, index, text_list)
+        pattern_check(updated_text)
+    if we:
+        updated_text = wave_else(we, index, text_list)
         pattern_check(updated_text)
 
     if ad:
@@ -281,10 +287,10 @@ for text in result_list:
 
 '''
 # 정답 비교
-#fr_answer = open('correct/1~100_100_correct.txt', 'r', encoding='UTF8')
+fr_answer = open('correct/1~100_100_correct.txt', 'r', encoding='UTF8')
 #fr_answer = open('correct/1~100_101_correct.txt', 'r', encoding='UTF8')
 #fr_answer = open('correct/1~100_102_correct.txt', 'r', encoding='UTF8')
-fr_answer = open('correct/1~100_103_correct.txt', 'r', encoding='UTF8')
+#fr_answer = open('correct/1~100_103_correct.txt', 'r', encoding='UTF8')
 
 answer_list = fr_answer.readlines()
 
