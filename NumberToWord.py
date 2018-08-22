@@ -8,7 +8,7 @@ start_time = time.time()
 
 # 3 ~ 4 년 -> 삼 에서 사 년
 # 30 ~ 40 % -> 삼십 에서 사십 퍼센트
-pattern_wave_anc = re.compile(r'(\d+\s*\D{0,2}\s*[~]\s*\d+\s*\D{0,2}\s*((퍼센트|개월|개년|원|년|일|세|월)|(%p|%|t|㎏|kg|gw|w|g|㎞|km|cm|mm|m)))', re.IGNORECASE)
+pattern_wave_anc = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[~]\s*\d+[.]?\d*\s*\D{0,2}\s*((퍼센트|개월|개년|원|년|일|세|월)|(%p|%|t|㎏|kg|gw|w|g|㎞|km|cm|mm|m)))', re.IGNORECASE)
 
 # 1~2명 -> 한두명
 # 50이상일때는 한자어로 읽는다.

@@ -24,7 +24,7 @@ mark_dict = {'%' : '퍼센트', 'p' : '포인트',
              '$': '달러', '＄': '달러', '￦': '원', '￥': '엔',
              'gw': '기가와트', 'w': '와트',
              't': '톤', '㎏': '킬로그램', 'kg': '킬로그램', 'g': '그램',
-             '㎞' : '킬로미터', 'km': '킬로미터', 'cm': '센티미터', 'mm': '밀리미터', 'm': '미터'}
+             '㎞' : '킬로미터', 'km': '킬로미터', 'cm': '센티미터', 'mm': '밀리미터', 'm': '미터', '㎡' : '제곱미터'}
 
 
 percent_dict = {'%p' : '퍼센트포인트', '%' : '퍼센트'}
@@ -33,7 +33,7 @@ math_sign_dict = {'+' : '플러스', '-' : '마이너스', '±' : '플러스마�
 currency_dict = {'$' : '달러', '＄' : '달러', '￦' : '원', '￥' : '엔'}
 watt_dict = {'gw' : '기가와트', 'w' : '와트'}
 weight_dict = {'t' : '톤', '㎏' : '킬로그램', 'kg' : '킬로그램', 'g' : '그램'}
-distance_dict = {'㎞' : '킬로미터', 'km' : '킬로미터', 'cm' : '센티미터', 'mm' : '밀리미터', 'm' : '미터'}
+distance_dict = {'㎞' : '킬로미터', 'km' : '킬로미터', 'cm' : '센티미터', 'mm' : '밀리미터', 'm' : '미터', '㎡' : '제곱미터'}
 
 
 
@@ -515,38 +515,49 @@ def wave_anc_trans(wa, index, text_list):
                 break
 
 
-        # '퍼센트'같은 우리말이 사용된 경우
-        if symbol_flag == 0:
-            for char in wave_divided_list[0]:
-                if ord(char) >= ord('가') and ord(char) <= ord('힣'):
-                    kor_len = kor_len + 1
-                if char == ' ':
-                    space_len = space_len + 1
 
-            num_len = len(wave_divided_list[0]) - kor_len - space_len
+        # 소수점이 있는 경우
+        if '.' in wave_divided_list[0]:
+            word_str = word_str + point_read(wave_divided_list[0])
 
+        # 소수점이 없는 경우
+        else:
+            # '퍼센트'같은 우리말이 사용된 경우
+            if symbol_flag == 0:
+                for char in wave_divided_list[0]:
+                    if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                        kor_len = kor_len + 1
+                    if char == ' ':
+                        space_len = space_len + 1
 
-        # '%'같은 특수문자가 사용된 경우
-        elif symbol_flag == 1:
-            for char in wave_divided_list[0]:
-                if char == ' ':
-                    space_len = space_len + 1
-
-            num_len = len(wave_divided_list[0]) - symbol_len - space_len
-
-            wave_divided_list[0] = wave_divided_list[0].replace(symbol, '')
+                num_len = len(wave_divided_list[0]) - kor_len - space_len
 
 
-        word_str = word_str + Cca_b_U_trans(wave_divided_list[0], word_str, num_len)
+            # '%'같은 특수문자가 사용된 경우
+            elif symbol_flag == 1:
+                for char in wave_divided_list[0]:
+                    if char == ' ':
+                        space_len = space_len + 1
 
+                num_len = len(wave_divided_list[0]) - symbol_len - space_len
+
+                wave_divided_list[0] = wave_divided_list[0].replace(symbol, '')
+
+
+            word_str = word_str + Cca_b_U_trans(wave_divided_list[0], word_str, num_len)
+
+
+        # 특수문자가 사용되었으면 다시 붙여주자
         if symbol_flag == 1:
             word_str = word_str + symbol_kor
 
 
+        ###########################################################################
 
         # '~' 문자 변환
         word_str = word_str + '에서'
 
+        ###########################################################################
 
 
         space_len = 0
@@ -564,28 +575,36 @@ def wave_anc_trans(wa, index, text_list):
                 symbol_flag = 1
                 break
 
-        if symbol_flag == 0:
-            for char in wave_divided_list[1]:
-                if ord(char) >= ord('가') and ord(char) <= ord('힣'):
-                    kor_len = kor_len + 1
-                if char == ' ':
-                    space_len = space_len + 1
+        # 소수점이 있는 경우
+        if '.' in wave_divided_list[1]:
+            word_str = word_str + point_read(wave_divided_list[1])
 
-            num_len = len(wave_divided_list[1]) - kor_len - space_len
+        # 소수점이 없는 경우
+        else:
+            if symbol_flag == 0:
+                for char in wave_divided_list[1]:
+                    if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                        kor_len = kor_len + 1
+                    if char == ' ':
+                        space_len = space_len + 1
 
-        elif symbol_flag == 1:
-            for char in wave_divided_list[1]:
-                if char == ' ':
-                    space_len = space_len + 1
+                num_len = len(wave_divided_list[1]) - kor_len - space_len
 
-            num_len = len(wave_divided_list[1]) - symbol_len - space_len
+            elif symbol_flag == 1:
+                for char in wave_divided_list[1]:
+                    if char == ' ':
+                        space_len = space_len + 1
 
-            wave_divided_list[1] = wave_divided_list[1].replace(symbol, '')
+                num_len = len(wave_divided_list[1]) - symbol_len - space_len
+
+                wave_divided_list[1] = wave_divided_list[1].replace(symbol, '')
 
 
 
-        word_str = word_str + Cca_b_U_trans(wave_divided_list[1], '', num_len)
+            word_str = word_str + Cca_b_U_trans(wave_divided_list[1], '', num_len)
 
+
+        # 특수문자가 사용되었으면 다시 붙여주자
         if symbol_flag == 1:
             word_str = word_str + symbol_kor
 
@@ -701,10 +720,12 @@ def wave_kor_trans(wk, index, text_list):
                 #word_str = word_str + symbol_before
 
 
-
+            ###########################################################################
 
             # '~' 문자 변환
             word_str = word_str + '에서'
+
+            ###########################################################################
 
 
             kor_len = 0
@@ -913,6 +934,7 @@ def Kca_b_trans(input_str, output_str, length):
 
 # Cca_b[+U] 로 읽는 경우
 # 315 => 삼백십오  이런식으로 변환해준다.
+# -315 => 마이너스삼백십오
 def Cca_b_U_trans(input_str, output_str, length):
 
     cca_str = input_str
@@ -921,6 +943,7 @@ def Cca_b_U_trans(input_str, output_str, length):
     unit_len = length           # 단위 제외 숫자만의 길이 ('12 개월' => unit_len = 2)
     unit_flag = 0
     no_more = 0
+
 
 
     for char in cca_str:
@@ -932,10 +955,13 @@ def Cca_b_U_trans(input_str, output_str, length):
             word_str = word_str + '유'
             no_more = 1
 
+        elif char in math_sign_dict:
+            word_str = word_str + math_sign_dict[char]
+            continue
+
         elif char == ',':
             continue
 
-        #elif (char == '$' or char == '＄' or char == '￦' or char == '￥') or (char == '℃' or char == '℉'):
         elif char in mark_dict:
             continue
 
@@ -945,13 +971,6 @@ def Cca_b_U_trans(input_str, output_str, length):
         elif (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
             word_str = word_str + char
 
-        #elif char == '%' or char == 'p' or char == 'P':
-        #elif char in percent_dict:
-        #    word_str = word_str + ' ' + percent_dict[char]
-
-        #elif char == '-' or char == '+' or char == '±':
-        #elif char in math_sign_dict:
-        #    word_str = word_str + ' ' + math_sign_dict[char] + ' '
 
         else:
 
@@ -1050,7 +1069,7 @@ def anc_trans(anc, index, text_list, pattern):
         if pattern == 'ge' and generation_flag == 0:
             continue
 
-
+        math_sign_flag = 0
         temperature_flag = 0
         currency_flag = 0
         symbol = ''
@@ -1124,7 +1143,8 @@ def anc_trans(anc, index, text_list, pattern):
         # -, + 같은 기호는 다른 기호와 함께 나올 수 있으므로 no_more 조건문 없어야한다.
         for i in math_sign_dict:
             if i in anc_str:
-                word_str = word_str + math_sign_dict[i]
+                #word_str = word_str + math_sign_dict[i]
+                math_sign_flag = 1
                 unit_len = unit_len + len(i)
                 break
 
@@ -1134,28 +1154,7 @@ def anc_trans(anc, index, text_list, pattern):
             if ord(char) >= ord('가') and ord(char) <= ord('힣'):
                 kor_len = kor_len + 1
 
-        '''
-        if '퍼센트' in u_str:
-            kor_len = 3
-        elif '개월' in u_str or '개년' in u_str:
-            kor_len = 2
-        elif '원' in u_str or '년' in u_str or '일' in u_str or '세' in u_str or '월' in u_str or '도' in u_str:
-            kor_len = 1
-        '''
 
-
-        ########### '40대 주민' 같은 경우 ###########
-        '''
-        if '대' in u_str:
-            kor_len = 1
-        
-        
-        for i in age_possible_list:
-            if i in u_str:
-                kor_len = kor_len + len(i)
-                break
-        '''
-        ############################################
 
 
         new_anc_str = anc_str.replace(',', '')        # new_cu_str 은 ',' 제거한 문자열
@@ -1175,19 +1174,22 @@ def anc_trans(anc, index, text_list, pattern):
 
         # 소수점 있는 경우
         elif '.' in new_anc_str:
+            word_str = word_str + point_read(new_anc_str)
+
+            '''
             # 소수점 기준으로 앞 부분과 뒷 부분으로 나눈다.
             point_divided_list = new_anc_str.split('.')
 
-            space_count = point_divided_list[0].count(' ')        # 소수점 앞의 공백 개수
+            space_count = point_divided_list[0].count(' ')  # 소수점 앞의 공백 개수
 
+            num_len = len(point_divided_list[0]) - space_count  # 빼주자
 
-            num_len = len(point_divided_list[0]) - space_count   # 빼주자
-
-            if currency_flag == 1:                          # -1 하는 이유는 화폐 기호 때문.
+            if currency_flag == 1:  # -1 하는 이유는 화폐 기호 때문.
                 num_len = num_len - 1
 
-            if '-' in new_anc_str or '+' in new_anc_str or '±' in new_anc_str:        # -36.5 이면 소수점 앞의 자리수는 3이 아니라 2
+            if '-' in new_anc_str or '+' in new_anc_str or '±' in new_anc_str:  # -36.5 이면 소수점 앞의 자리수는 3이 아니라 2
                 num_len = num_len - 1
+
 
             # 앞부분은 단위 따져가며 읽어야한다.
             word_str = Cca_b_U_trans(point_divided_list[0], word_str, num_len)
@@ -1215,7 +1217,7 @@ def anc_trans(anc, index, text_list, pattern):
                 word_str = word_str + ancient_dict[char]
 
 
-
+            '''
 
         # 단위 'symbol' 써주는 부분
         word_str = word_str + symbol
@@ -1226,3 +1228,68 @@ def anc_trans(anc, index, text_list, pattern):
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
 
     return text_list[index]
+
+
+
+
+
+# 소수점 읽기 함수
+def point_read(string_before):
+
+    string_after = ''
+
+    # 소수점 기준으로 앞 부분과 뒷 부분으로 나눈다.
+    point_divided_list = string_before.split('.')
+
+    #space_count = point_divided_list[0].count(' ')  # 소수점 앞의 공백 개수
+    num_len = len(point_divided_list[0]) #- space_count  # 빼주자
+
+
+    # $3.5 인 경우에 소수점 앞의 자리수는 2가 아니라 1
+    for i in currency_dict:
+        if i in point_divided_list[0]:
+            num_len = num_len - 1
+            break
+
+
+    # -36.5 인 경우에 소수점 앞의 자리수는 3이 아니라 2
+    for i in math_sign_dict:
+        if i in point_divided_list[0]:
+            num_len = num_len - 1
+            break
+
+
+    # 앞부분은 단위 따져가며 읽어야한다.
+    string_after = Cca_b_U_trans(point_divided_list[0], string_after, num_len)
+
+
+
+    #############################################################################
+
+    # 사이에 '쩜' 추가해주고
+    string_after = string_after + '쩜'
+
+    #############################################################################
+
+
+
+    # 뒷부분은 단위 없이 각각 한자어(ancient_dict)로 읽어야한다.
+    for char in point_divided_list[1]:
+        if char in mark_dict:
+            continue
+
+        elif (ord(char) >= ord('a') and ord(char) <= ord('z')) or (ord(char) >= ord('A') and ord(char) <= ord('Z')):
+            continue
+
+        elif (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
+            string_after = string_after + char
+            continue
+
+        elif char == '0':
+            string_after = string_after + '영'
+            continue
+
+        string_after = string_after + ancient_dict[char]
+
+
+    return string_after
