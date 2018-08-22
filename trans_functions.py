@@ -633,6 +633,8 @@ def wave_kor_trans(wk, index, text_list):
         symbol_before_flag = 0
         Cca_should_work = 0
 
+        num_diff = 0
+
         space_before = 0
         space_after = 0
 
@@ -671,7 +673,10 @@ def wave_kor_trans(wk, index, text_list):
         num_after = wave_divided_list[1].replace(symbol_after, '')
 
 
-        num_diff = int(num_after) - int(num_before)
+
+        if '.' not in num_before and '.' not in num_after:
+            num_diff = int(num_after) - int(num_before)
+
 
         num_before_len = len(num_before) #- space_before
         num_after_len = len(num_after) #- space_after
@@ -688,36 +693,40 @@ def wave_kor_trans(wk, index, text_list):
         else:
 
             # '~' 앞 부분 처리
-            for char in wave_divided_list[0]:
-                if (ord(char) >= ord('가') and ord(char) <= ord('힣')):
-                    kor_len = kor_len + 1
-                if char == ' ':
-                    space_len = space_len + 1
 
-            num_len = len(wave_divided_list[0]) - kor_len - space_len
+            # 소수점이 있는 경우
+            if '.' in wave_divided_list[0]:
+                word_str = word_str + point_read(wave_divided_list[0])
 
-
-            # '10명 ~ 60명' 이렇게 앞부분의 숫자에도 분류사가 있는 경우
-            if symbol_before_flag == 1:
-                #if (num_len == 2 and int(num_before) >= 5) or num_len >= 3:
-                if int(num_before) >= 50:
-                    Cca_should_work = 1
-
-                if Cca_should_work == 1:
-                    word_str = Cca_b_U_trans(wave_divided_list[0], word_str, num_len)
-                    #word_str = Cca_b_U_trans(num_before, word_str, num_len)
-                    #word_str = word_str + symbol_before
-
-                else:
-                    word_str = Kca_b_trans(wave_divided_list[0], word_str, num_len)
-                    #word_str = Kca_b_trans(num_before, word_str, num_len)
-                    #word_str = word_str + symbol_before
-
-            # '10 ~ 60명'
+            # 소수점이 없는 경우
             else:
-                word_str = Cca_b_U_trans(wave_divided_list[0], word_str, num_len)
-                #word_str = Cca_b_U_trans(num_before, word_str, num_len)
-                #word_str = word_str + symbol_before
+                for char in wave_divided_list[0]:
+                    if (ord(char) >= ord('가') and ord(char) <= ord('힣')):
+                        kor_len = kor_len + 1
+                    if char == ' ':
+                        space_len = space_len + 1
+
+                num_len = len(wave_divided_list[0]) - kor_len - space_len
+
+
+                # '10명 ~ 60명' 이렇게 앞부분의 숫자에도 분류사가 있는 경우
+                if symbol_before_flag == 1:
+                    #if (num_len == 2 and int(num_before) >= 5) or num_len >= 3:
+                    if int(num_before) >= 50:
+                        Cca_should_work = 1
+
+                    if Cca_should_work == 1:
+                        word_str = word_str + Cca_b_U_trans(wave_divided_list[0], word_str, num_len)
+
+
+                    else:
+                        word_str = word_str + Kca_b_trans(wave_divided_list[0], word_str, num_len)
+
+
+                # '10 ~ 60명'
+                else:
+                    word_str = word_str + Cca_b_U_trans(wave_divided_list[0], word_str, num_len)
+
 
 
             ###########################################################################
@@ -734,36 +743,40 @@ def wave_kor_trans(wk, index, text_list):
 
 
             # '~' 뒷 부분 처리
-            for char in wave_divided_list[1]:
-                if ord(char) >= ord('가') and ord(char) <= ord('힣'):
-                    kor_len = kor_len + 1
-                if char == ' ':
-                    space_len = space_len + 1
 
-            num_len = len(wave_divided_list[1]) - kor_len - space_len
+            # 소수점이 있는 경우
+            if '.' in wave_divided_list[1]:
+                word_str = word_str + point_read(wave_divided_list[1])
+
+            # 소수점이 없는 경우
+            else:
+
+                for char in wave_divided_list[1]:
+                    if ord(char) >= ord('가') and ord(char) <= ord('힣'):
+                        kor_len = kor_len + 1
+                    if char == ' ':
+                        space_len = space_len + 1
+
+                num_len = len(wave_divided_list[1]) - kor_len - space_len
 
 
 
-            if symbol_before_flag == 1:
-                #if (num_len == 2 and int(num_before) >= 5) or num_len >= 3:
-                if int(num_after) >= 50:
-                    Cca_should_work = 1
+                if symbol_before_flag == 1:
+                    #if (num_len == 2 and int(num_before) >= 5) or num_len >= 3:
+                    if int(num_after) >= 50:
+                        Cca_should_work = 1
 
-                if Cca_should_work == 1:
-                    word_str = Cca_b_U_trans(wave_divided_list[1], word_str, num_len)
-                    #word_str = Cca_b_U_trans(num_after, word_str, num_len)
-                    #word_str = word_str + symbol_after
+                    if Cca_should_work == 1:
+                        word_str = Cca_b_U_trans(wave_divided_list[1], word_str, num_len)
+
+
+                    else:
+                        word_str = Kca_b_trans(wave_divided_list[1], word_str, num_len)
+
 
                 else:
-                    word_str = Kca_b_trans(wave_divided_list[1], word_str, num_len)
-                    #word_str = Kca_b_trans(num_after, word_str, num_len)
-                    #word_str = word_str + symbol_after
+                    word_str = Cca_b_U_trans(wave_divided_list[1], word_str, num_len)
 
-
-            else:
-                word_str = Cca_b_U_trans(wave_divided_list[1], word_str, num_len)
-                #word_str = Cca_b_U_trans(num_after, word_str, num_len)
-                #word_str = word_str + symbol_after
 
 
 

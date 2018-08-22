@@ -13,7 +13,7 @@ pattern_wave_anc = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[~]\s*\d+[.]?\d*\s*\D{0,
 # 1~2명 -> 한두명
 # 50이상일때는 한자어로 읽는다.
 # 60 ~ 80 마리 -> 육십 에서 팔십 마리
-pattern_wave_kor = re.compile(r'(\d+\s*\D{0,2}\s*[~]\s*\d+\s*\D{0,2}\s*(시간|군데|마리|가지|사람|개사|보루|명|시|개|살|달|해|곳|배|대|장|갑|건))')
+pattern_wave_kor = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[~]\s*\d+[.]?\d*\s*\D{0,2}\s*(시간|군데|마리|가지|사람|개사|보루|명|시|개|살|달|해|곳|배|대|장|갑|건))')
 
 # 나머지 물결 패턴 모두 처리
 # 여기서는 물결('~')만 '에서'로 바꿔준다.
@@ -273,7 +273,7 @@ for text in text_list:
 
 end_time = time.time()
 elapsed = end_time - start_time
-print('\n작업 경과 시간 : ' + str(elapsed))
+print('\n작업 경과 시간 : ' + str(elapsed) + ' 초')
 
 result_list = text_list
 
