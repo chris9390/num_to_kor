@@ -6,6 +6,9 @@ import time
 start_time = time.time()
 
 
+# sm5, k9, bmw 520d
+pattern_vehicle_model = re.compile(r'[a-zA-Z]+\s*\d+')
+
 # 3 ~ 4 년 -> 삼 에서 사 년
 # 30 ~ 40 % -> 삼십 에서 사십 퍼센트
 pattern_wave_anc = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[~]\s*\d+[.]?\d*\s*\D{0,2}\s*((퍼센트|개월|개년|원|년|일|세|월)|(%p|%|t|㎏|kg|gw|w|g|㎞|km|cm|mm|m)))', re.IGNORECASE)
@@ -17,7 +20,7 @@ pattern_wave_kor = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[~]\s*\d+[.]?\d*\s*\D{0,
 
 # 나머지 물결 패턴 모두 처리
 # 여기서는 물결('~')만 '에서'로 바꿔준다.
-pattern_wave_else = re.compile(r'\d+\D*\s*[~]\s*\D*\d+')
+pattern_wave_else = re.compile(r'\d+\D*\s*[~∼]\s*\D*\d+')
 
 #age_possible_list = '(남성|여성|남자|여자|주부|지적장애인|조선족|대학생|재력가|할머니|할아버지|아버지|어머니|아들|딸|' \
 #                '일당|중국동포|차량털이범|초반|중반|후반|교수|초등|정신질환자|여대생|용의자|운전자|고령|재력가|' \
@@ -75,8 +78,8 @@ pattern_order = re.compile(r'(\d+\s*(차례|번째|번씩))')
 #예) 2018/1/1, 2018/01/01
 pattern_date = re.compile(r'((19|20)\d{2}\s*[-./]\s*(0?[1-9]|1[012])\s*[-./]\s*(0?[1-9]|[12][0-9]|3[0-1]))')
 
-#예) 5.18 광주민주화운동, 12 12 사태, 6. 25 전쟁
-pattern_anniversary = re.compile(r'(([1-9]|1[0-2])\s*[.]?\s*(0?[1-9]|[12][0-9]|3[0-1])\s*[가-힣]*(운동|전쟁|사태|성명|조치|선거|공동|대북|제재|세월호))')
+#예) 5.18 광주민주화운동, 12 12 사태, 6. 25 전쟁, 9.11 테러
+pattern_anniversary = re.compile(r'(([1-9]|1[0-2])\s*[.]?\s*(0?[1-9]|[12][0-9]|3[0-1])\s*[가-힣]*(테러|운동|전쟁|사태|성명|조치|선거|공동|대북|제재|세월호))')
 
 
 # 한자어 수사 + 분류사
@@ -85,7 +88,8 @@ pattern_anc_with_classifier = re.compile(r'(\d+(,\d{3})*\s*(퍼센트|(개월|�
 
 # 50미만 고유어 수사, 50이상 한자어 수사 + 분류사
 #예) 3 마리 -> 세 마리, 52 마리 -> 오십이 마리
-pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사|보루)|[명시개살달해곳배대장갑건]))')
+# 3명, 3시, 3개, 3살, 3달, 3해, 3곳, 3배, 차량 3대, 종이 3장, 담배 3갑, 사건 3건, 시체 3구, 선박 3척
+pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사|보루)|[명시개살달해곳배대장갑건구척]))')
 
 
 
@@ -98,11 +102,12 @@ pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%p|%|t|㎏|kg|gw|w|g|㎞
 
 
 
-fr = open('test.txt', 'r', encoding='UTF8')
+#fr = open('test.txt', 'r', encoding='UTF8')
 #fr = open('filtered/100_264_filtered.txt', 'r', encoding='UTF8')
 #fr = open('filtered/101_771_filtered.txt', 'r', encoding='UTF8')
 #fr = open('filtered/102_249_filtered.txt', 'r', encoding='UTF8')
 #fr = open('filtered/103_237_filtered.txt', 'r', encoding='UTF8')
+fr = open('filtered/104_231_filtered.txt', 'r', encoding='UTF8')
 
 fw = open('result.txt', 'w', encoding='UTF8')
 
@@ -115,7 +120,7 @@ result_list = []            # 변환된 결과 text 저장용
 def pattern_check(text):
 
     global wa, wk, we, ad, ge, nu, ck, pn_NNA, pn, cn, rn, ip, tn, cu, te, da, on, an, ac, kc, \
-        general_only_number, general_with_point, general_with_comma
+        vm, general_only_number, general_with_point, general_with_comma
 
     # 패턴화된 결합구조들
     #########################################################
@@ -140,6 +145,8 @@ def pattern_check(text):
 
     ac = pattern_anc_with_classifier.findall(text)  # 한자어 수사 + 분류사
     kc = pattern_kor_with_classifier.findall(text)  # 고유어 수사 + 분류사
+
+    vm = pattern_vehicle_model.findall(text)        # 모델명
     #########################################################
 
 
@@ -161,7 +168,7 @@ total = fr.readlines()
 # 입력 파일을 읽어서 text_list 에 추가
 count = 0
 for i in total:
-    if count == 10000:
+    if count == 100:
         break
 
     # 원본
@@ -248,6 +255,10 @@ for text in text_list:
         pattern_check(updated_text)
 
 
+    if vm:
+        updated_text = model_trans(vm, index, text_list)
+        pattern_check(updated_text)
+
     # 걸러지지 않은 나머지 숫자들 매치
 
     if general_with_comma:
@@ -284,13 +295,14 @@ for text in result_list:
 
 
 
+#'''
 
-'''
 # 정답 비교
-fr_answer = open('correct/1~100_100_correct.txt', 'r', encoding='UTF8')
+#fr_answer = open('correct/1~100_100_correct.txt', 'r', encoding='UTF8')
 #fr_answer = open('correct/1~100_101_correct.txt', 'r', encoding='UTF8')
 #fr_answer = open('correct/1~100_102_correct.txt', 'r', encoding='UTF8')
 #fr_answer = open('correct/1~100_103_correct.txt', 'r', encoding='UTF8')
+fr_answer = open('correct/1~100_104_correct.txt', 'r', encoding='UTF8')
 
 answer_list = fr_answer.readlines()
 
@@ -313,7 +325,8 @@ print('\n오답률 : ' + str(wrong_prob * 100) + '%')
 
 
 fr_answer.close()
-'''
+
+#'''
 
 
 fr.close()

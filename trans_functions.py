@@ -1,6 +1,6 @@
 import re
 pattern_wave_with_space = re.compile(r'\s*[~]\s*')
-
+pattern_only_num = re.compile(r'\d+')
 
 # 한자어
 ancient_dict = {'0' : '공', '1' : '일', '2' : '이', '3' : '삼', '4' : '사', '5' : '오', '6' : '육', '7' : '칠', '8' : '팔', '9' : '구'}
@@ -16,6 +16,10 @@ unit_dict = {'0' : '',
              '5' : '', '6' : '십', '7' : '백', '8' : '천',         # 만
              '9' : '', '10' : '십', '11' : '백', '12' : '천',      # 억
              '13' : '', '14' : '십', '15' : '백', '16' : '천'}     # 조
+
+# 수의 영어 읽기 사전
+num_eng_dict = {'0' : '제로', '1' : '원', '2' : '투', '3' : '쓰리', '4' : '포', '5' : '파이브', '6' : '식스', '7' : '세븐', '8' : '에잇', '9' : '나인'}
+
 
 # 특수문자
 mark_dict = {'%' : '퍼센트', 'p' : '포인트',
@@ -49,7 +53,8 @@ def number_unit_trans(nu, index, text_list):
 
         if type(i) == tuple:
             nu_str = i[0]
-        elif type(i) == str:
+        #elif type(i) == str:
+        else:
             nu_str = i
 
 
@@ -84,7 +89,8 @@ def currency_kor_trans(ck, index, text_list):
 
         if type(i) == tuple:
             ck_str = i[0]
-        elif type(i) == str:
+        #elif type(i) == str:
+        else:
             ck_str = i
 
 
@@ -100,13 +106,6 @@ def currency_kor_trans(ck, index, text_list):
         for char in ck_str:
             if ord(char) >= ord('가') and ord(char) <= ord('힣'):
                 kor_len = kor_len + 1
-
-        '''
-        if '달러' in ck_str or '위안' in ck_str:
-            kor_len = 2
-        elif '원' in ck_str or '엔' in ck_str:
-            kor_len = 1
-        '''
 
 
         num_len = len(ck_str) - space_len - comma_len - kor_len         # 자리수 예) 6,000 달러 => num_len = 4
@@ -320,7 +319,8 @@ def order_trans(on, index, text_list):
 
         if type(i) == tuple:
             on_str = i[0]
-        elif type(i) == str:
+        #elif type(i) == str:
+        else:
             on_str = i
 
         number_str = on_str
@@ -407,7 +407,8 @@ def date_trans(da, index, text_list):
 
         if type(i) == tuple:
             da_str = i[0]
-        elif type(i) == str:
+        #elif type(i) == str:
+        else:
             da_str = i
 
 
@@ -454,8 +455,10 @@ def anniversary_trans(an, index, text_list):
 
         if type(i) == tuple:
             an_str = i[0]
-        elif type(i) == str:
+        #elif type(i) == str:
+        else:
             an_str = i
+
 
         number_str = an_str
         word_str = ''
@@ -480,7 +483,8 @@ def wave_anc_trans(wa, index, text_list):
     for i in wa:
         if type(i) == tuple:
             wa_str = i[0]
-        elif type(i) == str:
+        #elif type(i) == str:
+        else:
             wa_str = i
 
         number_str = wa_str
@@ -619,10 +623,13 @@ def wave_anc_trans(wa, index, text_list):
 
 
 def wave_kor_trans(wk, index, text_list):
+
     for i in wk:
+
         if type(i) == tuple:
             wk_str = i[0]
-        elif type(i) == str:
+        #elif type(i) == str:
+        else:
             wk_str = i
 
         number_str = wk_str
@@ -793,14 +800,58 @@ def wave_else(we, index, text_list):
 
         if type(i) == tuple:
             we_str = i[0]
-        elif type(i) == str:
+        #elif type(i) == str:
+        else:
             we_str = i
 
         number_str = we_str
         word_str = ''
 
-        word_str = we_str.replace('~', '에서')
 
+        if '∼' in we_str:
+            word_str = we_str.replace('∼', '에서')
+        elif '~' in we_str:
+            word_str = we_str.replace('~', '에서')
+
+
+
+        translated_str = text_list[index].replace(number_str, word_str, 1)
+        text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
+
+    return text_list[index]
+
+
+
+
+def model_trans(vm, index, text_list):
+    for i in vm:
+
+        if type(i) == tuple:
+            vm_str = i[0]
+        else:
+            vm_str = i
+
+        number_str = vm_str
+        word_str = ''
+        num_str = ''
+
+
+        # 숫자 부분만 추출
+        num_extract = pattern_only_num.findall(vm_str)
+        if num_extract:
+            num_str = num_extract[0]
+
+        # sm5, k9
+        if len(num_str) == 1:
+            word_str = vm_str.replace(num_str, num_eng_dict[num_str])
+
+        # QZ8501
+        else:
+            for char in vm_str:
+                if ord(char) >= ord('0') and ord(char) <= ord('9'):
+                    word_str = word_str + ancient_dict[char]
+                else:
+                    word_str = word_str + char
 
 
         translated_str = text_list[index].replace(number_str, word_str, 1)
@@ -818,7 +869,8 @@ def kor_anc_trans(koranc, index, text_list):
 
         if type(i) == tuple:
             koranc_str = i[0]
-        elif type(i) == str:
+        #elif type(i) == str:
+        else:
             koranc_str = i
 
         number_str = koranc_str
@@ -860,7 +912,6 @@ def kor_anc_trans(koranc, index, text_list):
 # Kca_b 로 읽는 경우
 # 관형어 고유어 변환
 # 1 -> 한,  10 -> 열
-#def Kca_b_trans(kca, index, text_list):
 def Kca_b_trans(input_str, output_str, length):
 
     kca_str = input_str
@@ -946,7 +997,7 @@ def Kca_b_trans(input_str, output_str, length):
 
 
 # Cca_b[+U] 로 읽는 경우
-# 315 => 삼백십오  이런식으로 변환해준다.
+# 315 => 삼백십오
 # -315 => 마이너스삼백십오
 def Cca_b_U_trans(input_str, output_str, length):
 
@@ -1048,17 +1099,18 @@ def Cca_b_U_trans(input_str, output_str, length):
 
 
 # 위의 패턴들에 해당하지 않는 나머지 숫자(온도, 화폐, 퍼센트 등등 포함) 읽는 법
-#def general_trans(u, index, text_list, pattern):
 def anc_trans(anc, index, text_list, pattern):
 
     for i in anc:
         if type(i) == tuple:
             anc_str = i[0]
-        elif type(i) == str:
+        #elif type(i) == str:
+        else:
             anc_str = i
 
         age_flag = 0
         generation_flag = 0
+
 
         for j in human:
             if j in anc_str:
@@ -1189,48 +1241,7 @@ def anc_trans(anc, index, text_list, pattern):
         elif '.' in new_anc_str:
             word_str = word_str + point_read(new_anc_str)
 
-            '''
-            # 소수점 기준으로 앞 부분과 뒷 부분으로 나눈다.
-            point_divided_list = new_anc_str.split('.')
 
-            space_count = point_divided_list[0].count(' ')  # 소수점 앞의 공백 개수
-
-            num_len = len(point_divided_list[0]) - space_count  # 빼주자
-
-            if currency_flag == 1:  # -1 하는 이유는 화폐 기호 때문.
-                num_len = num_len - 1
-
-            if '-' in new_anc_str or '+' in new_anc_str or '±' in new_anc_str:  # -36.5 이면 소수점 앞의 자리수는 3이 아니라 2
-                num_len = num_len - 1
-
-
-            # 앞부분은 단위 따져가며 읽어야한다.
-            word_str = Cca_b_U_trans(point_divided_list[0], word_str, num_len)
-
-            # 사이에 '쩜' 추가해주고
-            word_str = word_str + '쩜'
-
-
-            # 뒷부분은 단위 없이 각각 한자어(ancient_dict)로 읽어야한다.
-            for char in point_divided_list[1]:
-                if char in mark_dict:
-                    continue
-
-                elif (ord(char) >= ord('a') and ord(char) <= ord('z')) or (ord(char) >= ord('A') and ord(char) <= ord('Z')):
-                    continue
-
-                elif (ord(char) >= ord('가') and ord(char) <= ord('힣')) or char == ' ':
-                    word_str = word_str + char
-                    continue
-
-                elif char == '0':
-                    word_str = word_str + '영'
-                    continue
-
-                word_str = word_str + ancient_dict[char]
-
-
-            '''
 
         # 단위 'symbol' 써주는 부분
         word_str = word_str + symbol
@@ -1254,8 +1265,8 @@ def point_read(string_before):
     # 소수점 기준으로 앞 부분과 뒷 부분으로 나눈다.
     point_divided_list = string_before.split('.')
 
-    #space_count = point_divided_list[0].count(' ')  # 소수점 앞의 공백 개수
-    num_len = len(point_divided_list[0]) #- space_count  # 빼주자
+    space_count = point_divided_list[0].count(' ')  # 소수점 앞의 공백 개수
+    num_len = len(point_divided_list[0]) - space_count  # 빼주자
 
 
     # $3.5 인 경우에 소수점 앞의 자리수는 2가 아니라 1

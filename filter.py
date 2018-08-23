@@ -11,9 +11,9 @@ pattern_long = re.compile(r'[가-힣]{0,10}\s*[가-힣]{0,10}\s*[1-9]0대\s*[가
 pattern_wave = re.compile(r'\D{0,10}\s*\d+\s*\D{0,5}\s*[~]\s*\d+\s*\D{0,10}')
 
 
-fr = open('/home/s20131533/pycharm_numbertoword/filtered/103_237_filtered.txt', 'r', encoding='UTF8')
-#fw = open('filtered/103_237_filtered.txt', 'w')
-fw = open('wave.txt','w')
+#fr = open('/home/s20131533/pycharm_numbertoword/filtered/103_237_filtered.txt', 'r', encoding='UTF8')
+fr = open('/home/public_data/news_corpus/news_norm_2015_104_231.txt', 'r', encoding='UTF8')
+fw = open('filtered/104_231_filtered.txt', 'w')
 
 total = fr.readlines()
 
@@ -37,12 +37,15 @@ for i in total:
 
 
 for text in text_list:
-    s = pattern_wave.findall(text)
-    if s:
-        for i in s:
-            fw.write(i + '\n')
+    s = pattern_kor.search(text)
+
+    # 숫자 없는 패턴으로 추출한 문장이 원래 문장이랑 일치하면
+    if s.group() == text:
+        continue
+
+    # 그게 아니면 숫자가 포함된 문장이다.
     else:
-        print('only text')
+        fw.write(text)
 
 
 '''
