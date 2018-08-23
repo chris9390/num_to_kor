@@ -12,8 +12,8 @@ pattern_wave = re.compile(r'\D{0,10}\s*\d+\s*\D{0,5}\s*[~]\s*\d+\s*\D{0,10}')
 
 
 #fr = open('/home/s20131533/pycharm_numbertoword/filtered/103_237_filtered.txt', 'r', encoding='UTF8')
-fr = open('/home/public_data/news_corpus/news_norm_2015_104_231.txt', 'r', encoding='UTF8')
-fw = open('filtered/104_231_filtered.txt', 'w')
+fr = open('/home/public_data/news_corpus/news_norm_2015_105_226.txt', 'r', encoding='UTF8')
+fw = open('filtered/105_226_filtered.txt', 'w')
 
 total = fr.readlines()
 
@@ -28,8 +28,8 @@ ambiguous = ['모두', '이상', '이하', '조사', '이후', '등']
 
 count = 0
 for i in total:
-    #if count == 200:
-    #    break
+    if count == 20000:
+        break
 
     text_list.append(i)
 

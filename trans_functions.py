@@ -834,12 +834,15 @@ def model_trans(vm, index, text_list):
         number_str = vm_str
         word_str = ''
         num_str = ''
-
+        no_more = 0
 
         # 숫자 부분만 추출
         num_extract = pattern_only_num.findall(vm_str)
         if num_extract:
             num_str = num_extract[0]
+
+        # 숫자 제외 영어 부분
+        eng_str = vm_str.replace(num_str, '')
 
         # sm5, k9
         if len(num_str) == 1:
@@ -848,11 +851,20 @@ def model_trans(vm, index, text_list):
         # QZ8501
         else:
             for char in vm_str:
+                if ((ord(char) >= ord('a') and ord(char) <= ord('z')) or (ord(char) >= ord('A') and ord(char) <= ord('Z'))) or char == ' ':
+                    word_str = word_str + char
+
+                else:
+                    if no_more == 0:
+                        word_str =  word_str + Cca_b_U_trans(num_str, '', len(num_str))
+                        no_more = 1
+            '''
+            for char in vm_str:
                 if ord(char) >= ord('0') and ord(char) <= ord('9'):
                     word_str = word_str + ancient_dict[char]
                 else:
                     word_str = word_str + char
-
+            '''
 
         translated_str = text_list[index].replace(number_str, word_str, 1)
         text_list[index] = translated_str  # 변경된 string을 계속 업데이트 해준다.
