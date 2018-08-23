@@ -6,8 +6,12 @@ import time
 start_time = time.time()
 
 
-# sm5, k9, bmw 520d
-pattern_vehicle_model = re.compile(r'[a-zA-Z]+\s*\d+')
+# K-9 자주포, sm5, k9, bmw 520d, QZ8501 항공기
+pattern_eng_num = re.compile(r'[a-zA-Z]+\s*[-\d]+')
+
+# 2D, 3D, 3-Match
+pattern_num_eng = re.compile(r'\d+\s*[-]*\s*[a-zA-Z]+')
+
 
 # 3 ~ 4 년 -> 삼 에서 사 년
 # 30 ~ 40 % -> 삼십 에서 사십 퍼센트
@@ -84,7 +88,7 @@ pattern_anniversary = re.compile(r'(([1-9]|1[0-2])\s*[.]?\s*(0?[1-9]|[12][0-9]|3
 
 # 한자어 수사 + 분류사
 #예) 3 개월 -> 삼 개월, 3 개년 -> 삼 개년
-pattern_anc_with_classifier = re.compile(r'(\d+(,\d{3})*\s*(퍼센트|(개월|개년)|[원년일세월]))')
+pattern_anc_with_classifier = re.compile(r'(\d+(,\d{3})*\s*(퍼센트|(개월|개년|개국)|[원년일세월]))')
 
 # 50미만 고유어 수사, 50이상 한자어 수사 + 분류사
 #예) 3 마리 -> 세 마리, 52 마리 -> 오십이 마리
@@ -107,7 +111,8 @@ pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%p|%|t|㎏|kg|gw|w|g|㎞
 #fr = open('filtered/101_771_filtered.txt', 'r', encoding='UTF8')
 #fr = open('filtered/102_249_filtered.txt', 'r', encoding='UTF8')
 #fr = open('filtered/103_237_filtered.txt', 'r', encoding='UTF8')
-fr = open('filtered/104_231_filtered.txt', 'r', encoding='UTF8')
+#fr = open('filtered/104_231_filtered.txt', 'r', encoding='UTF8')
+fr = open('filtered/105_226_filtered.txt', 'r', encoding='UTF8')
 
 fw = open('result.txt', 'w', encoding='UTF8')
 
@@ -120,7 +125,7 @@ result_list = []            # 변환된 결과 text 저장용
 def pattern_check(text):
 
     global wa, wk, we, ad, ge, nu, ck, pn_NNA, pn, cn, rn, ip, tn, cu, te, da, on, an, ac, kc, \
-        vm, general_only_number, general_with_point, general_with_comma
+        en, ne, general_only_number, general_with_point, general_with_comma
 
     # 패턴화된 결합구조들
     #########################################################
@@ -146,7 +151,8 @@ def pattern_check(text):
     ac = pattern_anc_with_classifier.findall(text)  # 한자어 수사 + 분류사
     kc = pattern_kor_with_classifier.findall(text)  # 고유어 수사 + 분류사
 
-    vm = pattern_vehicle_model.findall(text)        # 모델명
+    en = pattern_eng_num.findall(text)        # 영어 + 숫자
+    ne = pattern_num_eng.findall(text)        # 숫자 + 영어
     #########################################################
 
 
@@ -255,8 +261,11 @@ for text in text_list:
         pattern_check(updated_text)
 
 
-    if vm:
-        updated_text = model_trans(vm, index, text_list)
+    if en:
+        updated_text = eng_num_trans(en, index, text_list)
+        pattern_check(updated_text)
+    if ne:
+        updated_text = num_eng_trans(ne, index, text_list)
         pattern_check(updated_text)
 
     # 걸러지지 않은 나머지 숫자들 매치
@@ -284,7 +293,7 @@ for text in text_list:
 
 end_time = time.time()
 elapsed = end_time - start_time
-print('\n작업 경과 시간 : ' + str(elapsed) + ' 초')
+print('\n작업 경과 시간 : ' + str(elapsed) + ' 초\n')
 
 result_list = text_list
 
@@ -302,7 +311,8 @@ for text in result_list:
 #fr_answer = open('correct/1~100_101_correct.txt', 'r', encoding='UTF8')
 #fr_answer = open('correct/1~100_102_correct.txt', 'r', encoding='UTF8')
 #fr_answer = open('correct/1~100_103_correct.txt', 'r', encoding='UTF8')
-fr_answer = open('correct/1~100_104_correct.txt', 'r', encoding='UTF8')
+#fr_answer = open('correct/1~100_104_correct.txt', 'r', encoding='UTF8')
+fr_answer = open('correct/1~100_105_correct.txt', 'r', encoding='UTF8')
 
 answer_list = fr_answer.readlines()
 
