@@ -15,34 +15,28 @@ pattern_num_eng = re.compile(r'\d+\s*[-]*\s*[a-zA-Z]+')
 
 # 3 ~ 4 년 -> 삼 에서 사 년
 # 30 ~ 40 % -> 삼십 에서 사십 퍼센트
-pattern_wave_anc = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[~]\s*\d+[.]?\d*\s*\D{0,2}\s*((퍼센트|개월|개년|원|년|일|세|월)|(%p|%|t|㎏|kg|gw|w|g|㎞|km|cm|mm|m)))', re.IGNORECASE)
+pattern_wave_anc = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[~]\s*\d+[.]?\d*\s*\D{0,2}\s*((퍼센트|개월|개년|원|년|일|세|월)|(%p|%|t|㎏|kg|gw|㎾|kw|w|g|㎞|km|cm|mm|m)))', re.IGNORECASE)
 
 # 1~2명 -> 한두명
 # 50이상일때는 한자어로 읽는다.
 # 60 ~ 80 마리 -> 육십 에서 팔십 마리
-pattern_wave_kor = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[~]\s*\d+[.]?\d*\s*\D{0,2}\s*(시간|군데|마리|가지|사람|개사|보루|명|시|개|살|달|해|곳|배|대|장|갑|건))')
+pattern_wave_kor = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[~]\s*\d+[.]?\d*\s*\D{0,2}\s*(시간|차례|군데|마리|가지|사람|개사|보루|명|시|개|살|달|해|곳|배|대|장|갑|건|종|권|구))')
 
 # 나머지 물결 패턴 모두 처리
 # 여기서는 물결('~')만 '에서'로 바꿔준다.
 pattern_wave_else = re.compile(r'\d+\D*\s*[~∼]\s*\D*\d+')
 
-#age_possible_list = '(남성|여성|남자|여자|주부|지적장애인|조선족|대학생|재력가|할머니|할아버지|아버지|어머니|아들|딸|' \
-#                '일당|중국동포|차량털이범|초반|중반|후반|교수|초등|정신질환자|여대생|용의자|운전자|고령|재력가|' \
-#                '내연녀|제자|마약|노인|어르신|가장|마을|주민|미혼|기혼|고교|고등|청소년)'
-
-
-
-# ??대 앞뒤로 두 어절
-#pattern_age_with_dae = re.compile(r'([1-9]0대\s*' +age_possible_list + r')')
-pattern_age_with_dae = re.compile(r'[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}\s*[1-9]0대[가-힣]?\s*[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}')
+# 20대 남성, 10대 청소년
+# '대' 앞뒤로 두 어절
+pattern_age_dae = re.compile(r'[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}\s*[1-9]0대[가-힣]?\s*[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}')
 
 # 3대 조직, 10대 대기업
-#pattern_generation = re.compile(r'([0-9]+?대\s*[가-힣]*(원칙|운영|사업|과제|총장|선거|조직|혁신|그룹|국회|증권사|로펌|주요 로펌|기업|신기술|대기업|슈퍼푸드|건강식품))|((제|국내)\s*[0-9]+대)')
-pattern_generation = re.compile(r'[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}\s*[0-9]+대[가-힣]?\s*[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}')
+# '대' 앞뒤로 두 어절
+pattern_generation_dae = re.compile(r'[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}\s*[0-9]+대[가-힣]?\s*[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}')
 
 
 # 1조 3000억
-pattern_number_unit = re.compile(r'(\d+(,\d{3})*\s*[조억만])')
+pattern_number_unit = re.compile(r'(\d+(,\d{3})*\s*[조억만천백십](%p|%|t|㎏|kg|gw|㎾|kw|w|g|㎞|km|cm|mm|m|㎡)?)')
 
 
 # 달러, 원, 엔, 위안
@@ -93,14 +87,18 @@ pattern_anc_with_classifier = re.compile(r'(\d+(,\d{3})*\s*(퍼센트|(개월|�
 # 50미만 고유어 수사, 50이상 한자어 수사 + 분류사
 #예) 3 마리 -> 세 마리, 52 마리 -> 오십이 마리
 # 3명, 3시, 3개, 3살, 3달, 3해, 3곳, 3배, 차량 3대, 종이 3장, 담배 3갑, 사건 3건, 시체 3구, 선박 3척
-pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사|보루)|[명시개살달해곳배대장갑건구척]))')
+#pattern_kor_with_classifier = re.compile(r'(\d+(,\d{3})*\s*((시간|군데|마리|가지|사람|개사|보루)|[명시개살달해곳배대장갑건구척종권구]))')
+pattern_kor_with_classifier = re.compile(r'(\d+((,\d{3})*|[.]\d+)\s*((시간|군데|마리|가지|사람|개사|보루)|[명시개살달해곳배대장갑건구척종권구]))')
 
 
 
 #위의 정해진 패턴 제외 나머지 모든 숫자 패턴.('-130%', '36.5' 같은 패턴 포함)
-pattern_general_with_point = re.compile(r'([+-]?\s*\d+[.]\d+(%p|%|t|㎏|kg|gw|w|g|㎞|km|cm|mm|m)?)', re.IGNORECASE)       # 35.64
-pattern_general_with_comma = re.compile(r'([+-]?\s*\d+(,\d{3})+(%p|%|t|㎏|gw|w|kg|g|㎞|km|cm|mm|m)?)', re.IGNORECASE)    # 123,456,789
-pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%p|%|t|㎏|kg|gw|w|g|㎞|km|cm|mm|m)?)', re.IGNORECASE)            # 12345
+# 35.64kg
+pattern_general_with_point = re.compile(r'([+-]?\s*\d+[.]\d+(%p|%|t|㎏|kg|gw|㎾|kw|w|g|㎞|km|cm|mm|m|㎡)?)', re.IGNORECASE)
+# 123,456,789
+pattern_general_with_comma = re.compile(r'([+-]?\s*\d+(,\d{3})+(%p|%|t|㎏|gw|㎾|kw|w|kg|g|㎞|km|cm|mm|m|㎡)?)', re.IGNORECASE)
+# 123%
+pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%p|%|t|㎏|kg|gw|㎾|kw|w|g|㎞|km|cm|mm|m|㎡)?)', re.IGNORECASE)
 
 
 
@@ -112,7 +110,8 @@ pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%p|%|t|㎏|kg|gw|w|g|㎞
 #fr = open('filtered/102_249_filtered.txt', 'r', encoding='UTF8')
 #fr = open('filtered/103_237_filtered.txt', 'r', encoding='UTF8')
 #fr = open('filtered/104_231_filtered.txt', 'r', encoding='UTF8')
-fr = open('filtered/105_226_filtered.txt', 'r', encoding='UTF8')
+#fr = open('filtered/105_226_filtered.txt', 'r', encoding='UTF8')
+fr = open('filtered/difficult_filtered.txt', 'r', encoding='UTF8')
 
 fw = open('result.txt', 'w', encoding='UTF8')
 
@@ -132,8 +131,8 @@ def pattern_check(text):
     wa = pattern_wave_anc.findall(text)     # '~' 과 한자어
     wk = pattern_wave_kor.findall(text)     # '~' 와 고유어 / 한자어
     we = pattern_wave_else.findall(text)    # 물결 패턴 나머지
-    ad = pattern_age_with_dae.findall(text) # '대'가 붙은 나이
-    ge = pattern_generation.findall(text)           # 세대
+    ad = pattern_age_dae.findall(text) # '대'가 붙은 나이
+    ge = pattern_generation_dae.findall(text)           # 세대
     nu = pattern_number_unit.findall(text)  # 숫자 단위
     ck = pattern_currency_kor.findall(text)  # 화폐 한글 단위
     pn_NNA = pattern_phonenumber_with_NNA.findall(text)  # 국가번호 + 전화번호
@@ -312,7 +311,8 @@ for text in result_list:
 #fr_answer = open('correct/1~100_102_correct.txt', 'r', encoding='UTF8')
 #fr_answer = open('correct/1~100_103_correct.txt', 'r', encoding='UTF8')
 #fr_answer = open('correct/1~100_104_correct.txt', 'r', encoding='UTF8')
-fr_answer = open('correct/1~100_105_correct.txt', 'r', encoding='UTF8')
+#fr_answer = open('correct/1~100_105_correct.txt', 'r', encoding='UTF8')
+fr_answer = open('correct/difficult_correct.txt', 'r', encoding='UTF8')
 
 answer_list = fr_answer.readlines()
 

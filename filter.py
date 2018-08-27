@@ -9,11 +9,13 @@ pattern_kor = re.compile(r'[^0-9]*')
 pattern_short = re.compile(r'[1-9]0대\s*[가-힣]{0,10}')
 pattern_long = re.compile(r'[가-힣]{0,10}\s*[가-힣]{0,10}\s*[1-9]0대\s*[가-힣]{0,10}\s*[가-힣]{0,10}')
 pattern_wave = re.compile(r'\D{0,10}\s*\d+\s*\D{0,5}\s*[~]\s*\d+\s*\D{0,10}')
+pattern_gi = re.compile(r'[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}\s*\d+기[가-힣]?\s*[가-힣A-Z]{0,10}\s*[가-힣A-Z]{0,10}')
 
 
 #fr = open('/home/s20131533/pycharm_numbertoword/filtered/103_237_filtered.txt', 'r', encoding='UTF8')
-fr = open('/home/public_data/news_corpus/news_norm_2015_105_226.txt', 'r', encoding='UTF8')
-fw = open('filtered/105_226_filtered.txt', 'w')
+fr = open('/home/public_data/news_corpus/news_norm_2015_104_231.txt', 'r', encoding='UTF8')
+#fw = open('filtered/105_226_filtered.txt', 'w')
+fw = open('filtered/gi_filtered.txt','w')
 
 total = fr.readlines()
 
@@ -28,14 +30,15 @@ ambiguous = ['모두', '이상', '이하', '조사', '이후', '등']
 
 count = 0
 for i in total:
-    if count == 20000:
-        break
+    #if count == 20000:
+    #    break
 
     text_list.append(i)
 
     count = count + 1
 
-
+'''
+# 숫자 없는 라인은 걸러주는 역할
 for text in text_list:
     s = pattern_kor.search(text)
 
@@ -46,7 +49,17 @@ for text in text_list:
     # 그게 아니면 숫자가 포함된 문장이다.
     else:
         fw.write(text)
+'''
 
+
+for text in text_list:
+    s = pattern_gi.findall(text)
+
+    if s:
+        for i in s:
+            fw.write(i + '\n')
+    else:
+        continue
 
 '''
 noun_list = []
