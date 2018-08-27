@@ -1,5 +1,5 @@
 import re
-pattern_wave_with_space = re.compile(r'\s*[~]\s*')
+pattern_wave_with_space = re.compile(r'\s*[~-]\s*')
 pattern_only_num = re.compile(r'\d+')
 
 # 한자어
@@ -521,12 +521,23 @@ def wave_anc_trans(wa, index, text_list):
         # 물결('~') 양옆의 공백 제거
         wws = pattern_wave_with_space.findall(wa_str)
         for i in wws:
-            wa_str = wa_str.replace(i, '~')
+            if '~' in wa_str:
+                wa_str = wa_str.replace(i, '~')
+            elif '∼' in wa_str:
+                wa_str = wa_str.replace(i, '∼')
+            elif '-' in wa_str:
+                wa_Str = wa_str.replace(i, '-')
 
 
 
+        if '~' in wa_str:
+            wave_divided_list = wa_str.split('~')
+        elif '∼' in wa_str:
+            wave_divided_list = wa_str.split('∼')
+        elif '-' in wa_str:
+            wave_divided_list = wa_str.split('-')
 
-        wave_divided_list = wa_str.split('~')
+
 
         # '~' 앞 부분 처리
         for i in mark_dict:
@@ -668,10 +679,21 @@ def wave_kor_trans(wk, index, text_list):
         # 물결('~') 양옆의 공백 제거
         wws = pattern_wave_with_space.findall(wk_str)
         for i in wws:
-            wk_str = wk_str.replace(i, '~')
+            if '~' in wk_str:
+                wk_str = wk_str.replace(i, '~')
+            elif '∼' in wk_str:
+                wk_str = wk_str.replace(i, '∼')
+            elif '-' in wk_str:
+                wk_str = wk_str.replace(i, '-')
 
 
-        wave_divided_list = wk_str.split('~')
+
+        if '~' in wk_str:
+            wave_divided_list = wk_str.split('~')
+        elif '∼' in wk_str:
+            wave_divided_list = wk_str.split('∼')
+        elif '-' in wk_str:
+            wave_divided_list = wk_str.split('-')
 
         # =========================================================================
 

@@ -7,7 +7,7 @@ start_time = time.time()
 
 
 # K-9 자주포, sm5, k9, bmw 520d, QZ8501 항공기
-pattern_eng_num = re.compile(r'[a-zA-Z]+\s*[-\d]+')
+pattern_eng_num = re.compile(r'[a-zA-Z]+[.]?\s*[-\d]+')
 
 # 2D, 3D, 3-Match
 pattern_num_eng = re.compile(r'\d+\s*[-]*\s*[a-zA-Z]+')
@@ -15,12 +15,12 @@ pattern_num_eng = re.compile(r'\d+\s*[-]*\s*[a-zA-Z]+')
 
 # 3 ~ 4 년 -> 삼 에서 사 년
 # 30 ~ 40 % -> 삼십 에서 사십 퍼센트
-pattern_wave_anc = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[~]\s*\d+[.]?\d*\s*\D{0,2}\s*((퍼센트|개월|개년|원|년|일|세|월)|(%p|%|t|㎏|kg|gw|㎾|kw|w|g|㎞|km|cm|mm|m)))', re.IGNORECASE)
+pattern_wave_anc = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[∼~-]\s*\d+[.]?\d*\s*\D{0,2}\s*((퍼센트|개월|개년|원|년|일|세|월)|(%p|%|t|㎏|kg|gw|㎾|kw|w|g|㎞|km|cm|mm|m)))', re.IGNORECASE)
 
 # 1~2명 -> 한두명
 # 50이상일때는 한자어로 읽는다.
 # 60 ~ 80 마리 -> 육십 에서 팔십 마리
-pattern_wave_kor = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[~]\s*\d+[.]?\d*\s*\D{0,2}\s*(시간|차례|군데|마리|가지|사람|개사|보루|명|시|개|살|달|해|곳|배|대|장|갑|건|종|권|구))')
+pattern_wave_kor = re.compile(r'(\d+[.]?\d*\s*\D{0,2}\s*[∼~-]\s*\d+[.]?\d*\s*\D{0,2}\s*(시간|차례|군데|마리|가지|사람|개사|보루|명|시|개|살|달|해|곳|배|대|장|갑|건|종|권|구))')
 
 # 나머지 물결 패턴 모두 처리
 # 여기서는 물결('~')만 '에서'로 바꿔준다.
