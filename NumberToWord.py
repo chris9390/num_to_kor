@@ -111,9 +111,9 @@ pattern_general_only_number = re.compile(r'([+-]?\s*\d+(%p|%|t|㎏|kg|gw|㎾|kw|
 #fr = open('filtered/103_237_filtered.txt', 'r', encoding='UTF8')
 #fr = open('filtered/104_231_filtered.txt', 'r', encoding='UTF8')
 #fr = open('filtered/105_226_filtered.txt', 'r', encoding='UTF8')
-fr = open('filtered/difficult_filtered.txt', 'r', encoding='UTF8')
+#fr = open('filtered/difficult_filtered.txt', 'r', encoding='UTF8')
 
-fw = open('result.txt', 'w', encoding='UTF8')
+#fw = open('result.txt', 'w', encoding='UTF8')
 
 
 original_list = []          # 원본 text 저장용
@@ -167,7 +167,7 @@ def pattern_check(text):
 ##################################################################################################
 
 
-
+'''
 total = fr.readlines()
 
 # 입력 파일을 읽어서 text_list 에 추가
@@ -183,127 +183,136 @@ for i in total:
     text_list.append(i)
 
     count = count + 1
+'''
+
+def NumberToWord(big_text):
+    index = 0
+
+    # 개행 단위('\n')로 나눠서 text_list 배열로 저장
+    text_list = big_text.split('\n')
+
+    # text는 리스트 안의 각 문장.
+    for text in text_list:
+
+        pattern_check(text)
+        print(str(index+1))
 
 
-index = 0
-# text는 리스트 안의 각 문장.
-for text in text_list:
 
-    pattern_check(text)
-    print(str(index+1))
+        # 패턴화된 결합구조로 일단 걸러낸다.
+        if wa:
+            updated_text = wave_anc_trans(wa, index, text_list)
+            pattern_check(updated_text)
+        if wk:
+            updated_text = wave_kor_trans(wk, index, text_list)
+            pattern_check(updated_text)
+        if we:
+            updated_text = wave_else(we, index, text_list)
+            pattern_check(updated_text)
 
-
-
-    # 패턴화된 결합구조로 일단 걸러낸다.
-    if wa:
-        updated_text = wave_anc_trans(wa, index, text_list)
-        pattern_check(updated_text)
-    if wk:
-        updated_text = wave_kor_trans(wk, index, text_list)
-        pattern_check(updated_text)
-    if we:
-        updated_text = wave_else(we, index, text_list)
-        pattern_check(updated_text)
-
-    if ad:
-        updated_text = anc_trans(ad, index, text_list, 'ad')
-        pattern_check(updated_text)
-    if ge:
-        updated_text = anc_trans(ge, index, text_list, 'ge')
-        pattern_check(updated_text)
-    if an:
-        updated_text = anniversary_trans(an, index, text_list)
-        pattern_check(updated_text)
-    if nu:
-        updated_text = number_unit_trans(nu, index, text_list)
-        pattern_check(updated_text)
-    if ck:
-        updated_text = currency_kor_trans(ck, index, text_list)
-        pattern_check(updated_text)
-    if pn_NNA:
-        updated_text = phonenum_trans(pn_NNA, index, text_list)
-        pattern_check(updated_text)
-    if pn:
-        updated_text = phonenum_trans(pn, index, text_list)
-        pattern_check(updated_text)
-    if cn:
-        updated_text = carnum_trans(cn, index, text_list)
-        pattern_check(updated_text)
-    if rn:
-        updated_text = regnum_trans(rn, index, text_list)
-        pattern_check(updated_text)
-    if ip:
-        updated_text = ipnum_trans(ip, index, text_list)
-        pattern_check(updated_text)
-    if tn:
-        updated_text = timenum_trans(tn, index, text_list)
-        pattern_check(updated_text)
-    if da:
-        updated_text = date_trans(da, index, text_list)
-        pattern_check(updated_text)
-    if cu:
-        updated_text = anc_trans(cu, index, text_list, None)
-        pattern_check(updated_text)
-    if te:
-        updated_text = anc_trans(te, index, text_list, None)
-        pattern_check(updated_text)
-    if on:
-        updated_text = order_trans(on, index, text_list)
-        pattern_check(updated_text)
+        if ad:
+            updated_text = anc_trans(ad, index, text_list, 'ad')
+            pattern_check(updated_text)
+        if ge:
+            updated_text = anc_trans(ge, index, text_list, 'ge')
+            pattern_check(updated_text)
+        if an:
+            updated_text = anniversary_trans(an, index, text_list)
+            pattern_check(updated_text)
+        if nu:
+            updated_text = number_unit_trans(nu, index, text_list)
+            pattern_check(updated_text)
+        if ck:
+            updated_text = currency_kor_trans(ck, index, text_list)
+            pattern_check(updated_text)
+        if pn_NNA:
+            updated_text = phonenum_trans(pn_NNA, index, text_list)
+            pattern_check(updated_text)
+        if pn:
+            updated_text = phonenum_trans(pn, index, text_list)
+            pattern_check(updated_text)
+        if cn:
+            updated_text = carnum_trans(cn, index, text_list)
+            pattern_check(updated_text)
+        if rn:
+            updated_text = regnum_trans(rn, index, text_list)
+            pattern_check(updated_text)
+        if ip:
+            updated_text = ipnum_trans(ip, index, text_list)
+            pattern_check(updated_text)
+        if tn:
+            updated_text = timenum_trans(tn, index, text_list)
+            pattern_check(updated_text)
+        if da:
+            updated_text = date_trans(da, index, text_list)
+            pattern_check(updated_text)
+        if cu:
+            updated_text = anc_trans(cu, index, text_list, None)
+            pattern_check(updated_text)
+        if te:
+            updated_text = anc_trans(te, index, text_list, None)
+            pattern_check(updated_text)
+        if on:
+            updated_text = order_trans(on, index, text_list)
+            pattern_check(updated_text)
 
 
-    if ac:
-        updated_text = anc_trans(ac, index, text_list, None)
-        pattern_check(updated_text)
-    if kc:
-        updated_text = kor_anc_trans(kc, index, text_list)
-        pattern_check(updated_text)
+        if ac:
+            updated_text = anc_trans(ac, index, text_list, None)
+            pattern_check(updated_text)
+        if kc:
+            updated_text = kor_anc_trans(kc, index, text_list)
+            pattern_check(updated_text)
 
 
-    if en:
-        updated_text = eng_num_trans(en, index, text_list)
-        pattern_check(updated_text)
-    if ne:
-        updated_text = num_eng_trans(ne, index, text_list)
-        pattern_check(updated_text)
+        if en:
+            updated_text = eng_num_trans(en, index, text_list)
+            pattern_check(updated_text)
+        if ne:
+            updated_text = num_eng_trans(ne, index, text_list)
+            pattern_check(updated_text)
 
-    # 걸러지지 않은 나머지 숫자들 매치
+        # 걸러지지 않은 나머지 숫자들 매치
 
-    if general_with_comma:
-        updated_text = anc_trans(general_with_comma, index, text_list, None)
-        pattern_check(updated_text)
-    if general_with_point:
-        updated_text = anc_trans(general_with_point, index, text_list, None)
-        pattern_check(updated_text)
-    if general_only_number:
-        updated_text = anc_trans(general_only_number, index, text_list, None)
-        pattern_check(updated_text)
+        if general_with_comma:
+            updated_text = anc_trans(general_with_comma, index, text_list, None)
+            pattern_check(updated_text)
+        if general_with_point:
+            updated_text = anc_trans(general_with_point, index, text_list, None)
+            pattern_check(updated_text)
+        if general_only_number:
+            updated_text = anc_trans(general_only_number, index, text_list, None)
+            pattern_check(updated_text)
 
 
-    '''    
-    else:
-        print('No Match : ' + text)
+        '''    
+        else:
+            print('No Match : ' + text)
+        '''
+
+
+        index = index + 1
+
+
+
+    end_time = time.time()
+    elapsed = end_time - start_time
+    print('\n작업 경과 시간 : ' + str(elapsed) + ' 초\n')
+
+    result_list = text_list
+
+    '''
+    for text in result_list:
+        fw.write(text)
     '''
 
-
-    index = index + 1
-
-
-
-end_time = time.time()
-elapsed = end_time - start_time
-print('\n작업 경과 시간 : ' + str(elapsed) + ' 초\n')
-
-result_list = text_list
-
-for text in result_list:
-    #print(text)
-    fw.write(text)
+    return result_list
 
 
 
 
-#'''
+
+'''
 
 # 정답 비교
 #fr_answer = open('correct/1~100_100_correct.txt', 'r', encoding='UTF8')
@@ -336,12 +345,12 @@ print('\n오답률 : ' + str(wrong_prob * 100) + '%')
 
 fr_answer.close()
 
-#'''
+'''
 
-
+'''
 fr.close()
 fw.close()
-
+'''
 
 
 
